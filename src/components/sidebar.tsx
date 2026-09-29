@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu } from "lucide-react"
+import { useUIStore } from "@/stores/ui-store"
 
 const NAV_ITEMS = [
   { name: "Graph", href: "/", icon: Network },
@@ -15,16 +15,16 @@ const NAV_ITEMS = [
 ]
 
 export function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const { sidebarOpen, setSidebarOpen } = useUIStore()
   const pathname = usePathname()
 
   return (
     <>
       {/* Collapsed State: Button to open sidebar */}
-      {!isOpen && (
+      {!sidebarOpen && (
         <button 
           className="absolute top-5 left-6 z-50 flex items-center gap-3 px-3 py-2 -ml-3 -mt-2 rounded-xl bg-transparent hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all cursor-pointer select-none group outline-none"
-          onClick={() => setIsOpen(true)}
+          onClick={() => setSidebarOpen(true)}
         >
           <Menu size={16} className="text-white/40 group-hover:text-white/80 transition-colors" />
           <div className="flex items-center gap-2.5">
@@ -41,7 +41,7 @@ export function Sidebar() {
 
       {/* Expanded Sidebar */}
       <div 
-        className={`fixed top-0 left-0 h-full w-[260px] bg-[#09090b]/95 backdrop-blur-3xl border-r border-white/[0.04] z-50 flex flex-col shadow-2xl transition-transform duration-500 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-[260px] bg-[#09090b]/95 backdrop-blur-3xl border-r border-white/[0.04] z-50 flex flex-col shadow-2xl transition-transform duration-500 ease-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 select-none mt-1">
@@ -55,7 +55,7 @@ export function Sidebar() {
             <span className="text-sm font-medium text-white/90 tracking-wider">MYCELIA</span>
           </div>
           <button 
-            onClick={() => setIsOpen(false)}
+            onClick={() => setSidebarOpen(false)}
             className="text-white/30 hover:text-white/70 transition-colors p-1 rounded-md hover:bg-white/5"
           >
             <ChevronsLeft size={16} />
@@ -100,10 +100,10 @@ export function Sidebar() {
       </div>
       
       {/* Backdrop for mobile / small screens, optional but good for focus. We'll skip for desktop to allow interaction if wanted, but overlay is fine */}
-      {isOpen && (
+      {sidebarOpen && (
         <div 
           className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px] transition-opacity sm:hidden"
-          onClick={() => setIsOpen(false)}
+          onClick={() => setSidebarOpen(false)}
         />
       )}
     </>
