@@ -1,7 +1,7 @@
 export const SEED_NODES = [
-  { id: "c-family", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Family", color: "#ef4444" } },
-  { id: "c-work", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Design Team", color: "#3b82f6" } },
-  { id: "c-college", type: "cluster", position: { x: 0, y: 0 }, data: { label: "College", color: "#10b981" } },
+  { id: "c-family", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Family", color: "#ef4444", description: "Immediate and extended family members." } },
+  { id: "c-work", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Design Team", color: "#3b82f6", description: "Collaborate on projects and share feedback." } },
+  { id: "c-college", type: "cluster", position: { x: 0, y: 0 }, data: { label: "College", color: "#10b981", description: "Old friends from university days." } },
   { id: "p-mom", type: "person", position: { x: 0, y: 0 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString() } },
   { id: "p-dad", type: "person", position: { x: 0, y: 0 }, data: { label: "Dad" } },
   { id: "p-alex", type: "person", position: { x: 0, y: 0 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(Date.now() - 15 * 86400000).toISOString(), nextActionReason: "Project check-in" } },

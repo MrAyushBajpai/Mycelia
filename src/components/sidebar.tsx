@@ -8,7 +8,7 @@ import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, Chevr
 const NAV_ITEMS = [
   { name: "Graph", href: "/", icon: Network },
   { name: "People", href: "/people", icon: User },
-  { name: "Groups", href: "/groups", icon: Users },
+  { name: "Circles", href: "/circles", icon: Users },
   { name: "Calendar", href: "/calendar", icon: Calendar },
   { name: "Notes", href: "/notes", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
