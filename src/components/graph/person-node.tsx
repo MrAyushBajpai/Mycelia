@@ -10,6 +10,7 @@ export type PersonNodeData = {
   label: string
   lastContacted?: string | null
   cadenceDays?: number | null
+  nextActionReason?: string | null
 }
 
 export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeProps) {
@@ -24,6 +25,7 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   let isOverdue = false
+  let isDueSoon = false
   let lastContactedStr = "Never"
 
   if (d.lastContacted) {
@@ -37,7 +39,11 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
     else if (diffDays === 1) lastContactedStr = "Yesterday"
     else lastContactedStr = `${diffDays} days ago`
     
-    if (d.cadenceDays && diffDays > d.cadenceDays) isOverdue = true
+    if (d.cadenceDays) {
+      const daysUntilDue = d.cadenceDays - diffDays
+      if (daysUntilDue < 0) isOverdue = true
+      else if (daysUntilDue <= 2) isDueSoon = true
+    }
   } else if (d.cadenceDays) {
     isOverdue = true
   }
@@ -79,18 +85,24 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
           selected 
             ? "border-primary/50 scale-105" 
             : "hover:border-white/20 hover:scale-[1.03]",
-          isOverdue && !selected && "border-destructive/60"
+          isOverdue && !selected && "border-destructive/60",
+          isDueSoon && !selected && "border-amber-500/60"
         )}
         style={{
           boxShadow: selected
             ? '0 0 24px rgba(0,240,255,0.2), 0 0 8px rgba(0,240,255,0.1)'
             : isOverdue && !selected
               ? '0 0 16px rgba(255,85,0,0.2)'
-              : 'none',
+              : isDueSoon && !selected
+                ? '0 0 16px rgba(245,158,11,0.2)'
+                : 'none',
         }}
       >
         {isOverdue && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
+        )}
+        {isDueSoon && !isOverdue && (
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
         <Handle type="target" position={Position.Left} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
         <div className="flex items-center gap-2">
@@ -123,10 +135,16 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Last Contact</span>
-              <span className={`text-[12px] ${isOverdue ? "text-destructive font-medium" : "text-white/70"}`}>
+              <span className={`text-[12px] ${isOverdue ? "text-destructive font-medium" : isDueSoon ? "text-amber-500 font-medium" : "text-white/70"}`}>
                 {lastContactedStr}
               </span>
             </div>
+            {d.nextActionReason && (
+              <div className="flex flex-col gap-0.5 mt-1 border-t border-white/5 pt-2">
+                <span className="text-[10px] uppercase tracking-wider text-white/30 font-semibold">Next Action</span>
+                <span className="text-[12px] text-white/90 leading-relaxed">{d.nextActionReason}</span>
+              </div>
+            )}
           </div>
         </div>
       </NodeToolbar>
