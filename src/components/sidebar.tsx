@@ -1,19 +1,22 @@
 "use client"
 
 import { useState } from "react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu } from "lucide-react"
 
 const NAV_ITEMS = [
-  { name: "Graph", icon: Network, isActive: true },
-  { name: "People", icon: User },
-  { name: "Groups", icon: Users },
-  { name: "Calendar", icon: Calendar },
-  { name: "Notes", icon: FileText },
-  { name: "Settings", icon: Settings },
+  { name: "Graph", href: "/", icon: Network },
+  { name: "People", href: "/people", icon: User },
+  { name: "Groups", href: "/groups", icon: Users },
+  { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Notes", href: "/notes", icon: FileText },
+  { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <>
@@ -63,18 +66,20 @@ export function Sidebar() {
         <div className="flex-1 px-4 py-6 flex flex-col gap-1.5">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
+            const isActive = pathname === item.href
             return (
-              <button
+              <Link
                 key={item.name}
+                href={item.href}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  item.isActive 
+                  isActive 
                     ? "bg-primary/10 text-primary border border-primary/20" 
                     : "text-white/50 hover:text-white/90 hover:bg-white/5 border border-transparent"
                 }`}
               >
-                <Icon size={16} className={item.isActive ? "text-primary" : "text-white/40"} />
+                <Icon size={16} className={isActive ? "text-primary" : "text-white/40"} />
                 {item.name}
-              </button>
+              </Link>
             )
           })}
         </div>
