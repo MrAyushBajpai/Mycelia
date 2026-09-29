@@ -166,16 +166,19 @@ export function ContactDetail() {
         <Section title="Action & History">
           <DisplayField label="Last interaction" value={lastContactedStr} />
           <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
-          <textarea
-            value={(data.nextActionReason as string) || ""}
-            onChange={(e) => updateField("nextActionReason", e.target.value)}
-            placeholder="Reason for next contact..."
-            className="w-full mt-1 bg-transparent border border-transparent hover:bg-white/[0.03] hover:border-white/5 rounded-lg p-2 -ml-2 text-[13px] font-normal min-h-[40px] outline-none focus:bg-black/20 focus:border-primary/30 transition-all resize-none overflow-hidden placeholder:text-white/30 text-white/90"
-            onInput={(e) => {
-              e.currentTarget.style.height = 'auto';
-              e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
-            }}
-          />
+          <div className="flex flex-col mt-1">
+            <span className="text-[12px] font-normal text-white/40 py-1">Reason for contact</span>
+            <textarea
+              value={(data.nextActionReason as string) || ""}
+              onChange={(e) => updateField("nextActionReason", e.target.value)}
+              placeholder="What to discuss next..."
+              className="w-full bg-transparent border border-transparent hover:bg-white/[0.03] hover:border-white/5 rounded-lg p-2 -ml-2 text-[13px] font-normal min-h-[40px] outline-none focus:bg-black/20 focus:border-primary/30 transition-all resize-none overflow-hidden placeholder:text-white/30 text-white/90"
+              onInput={(e) => {
+                e.currentTarget.style.height = 'auto';
+                e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+              }}
+            />
+          </div>
           <div className="flex items-center justify-between py-1.5 gap-4 group mt-1 pt-2 border-t border-white/5">
             <span className="text-[12px] font-normal text-white/40 shrink-0">Cadence</span>
             <select
