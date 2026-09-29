@@ -5,6 +5,7 @@ import { ReactFlowProvider } from "@xyflow/react"
 import { GraphCanvas } from "@/components/graph/graph-canvas"
 import { ContactDetail } from "@/components/panels/contact-detail"
 import { Toolbar } from "@/components/toolbar"
+import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 
 const SEED_NODES = [
@@ -43,6 +44,7 @@ export default function Home() {
     <ReactFlowProvider>
       <main className="relative flex-1">
         <Toolbar />
+        <CommandBar />
         <GraphCanvas />
         <ContactDetail />
       </main>

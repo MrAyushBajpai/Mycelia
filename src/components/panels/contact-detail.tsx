@@ -13,10 +13,15 @@ export function ContactDetail() {
   const [logInput, setLogInput] = useState("")
   const [logDate, setLogDate] = useState("")
 
+  const [newDateLabel, setNewDateLabel] = useState("")
+  const [newDateValue, setNewDateValue] = useState("")
+
   const node = nodes.find((n) => n.id === selectedNodeId)
   if (!node || node.type === "cluster") return null
 
   const data = node.data as Record<string, unknown>
+  const customDates = (data.customDates as Record<string, string>) || {}
+  
   const interactions = getByContact(node.id)
   const connections = edges.filter((e) => e.source === node.id || e.target === node.id)
   const connectedNodes = connections.map((e) => {
@@ -53,6 +58,29 @@ export function ContactDetail() {
     setNodes(updated)
   }
 
+  function handleAddCustomDate(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newDateLabel.trim() || !newDateValue) return
+    const updated = nodes.map((n) => {
+      if (n.id !== node!.id) return n
+      const existing = (n.data.customDates as Record<string, string>) || {}
+      return { ...n, data: { ...n.data, customDates: { ...existing, [newDateLabel.trim()]: newDateValue } } }
+    })
+    setNodes(updated)
+    setNewDateLabel("")
+    setNewDateValue("")
+  }
+
+  function removeCustomDate(labelToRemove: string) {
+    const updated = nodes.map((n) => {
+      if (n.id !== node!.id) return n
+      const existing = { ...((n.data.customDates as Record<string, string>) || {}) }
+      delete existing[labelToRemove]
+      return { ...n, data: { ...n.data, customDates: existing } }
+    })
+    setNodes(updated)
+  }
+
   return (
     <aside className="absolute right-0 top-0 h-screen w-80 border-l bg-card p-5 shadow-lg z-10 flex flex-col overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
@@ -66,9 +94,27 @@ export function ContactDetail() {
         <Section title="Details">
           <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} />
           <EditableField label="Phone" value={data.phone as string} onChange={(v) => updateField("phone", v)} />
-          <EditableField label="Birthday" value={data.birthday as string} onChange={(v) => updateField("birthday", v)} type="date" />
           <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" />
           <EditableField label="Notes" value={data.notes as string} onChange={(v) => updateField("notes", v)} />
+        </Section>
+
+        <Section title="Important Dates">
+          {Object.entries(customDates).map(([lbl, val]) => (
+            <div key={lbl} className="flex items-center justify-between py-1 group">
+              <span className="text-muted-foreground">{lbl}</span>
+              <div className="flex items-center gap-2">
+                <span>{new Date(val).toLocaleDateString()}</span>
+                <button onClick={() => removeCustomDate(lbl)} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                  <X size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+          <form onSubmit={handleAddCustomDate} className="flex gap-1 mt-2">
+            <Input value={newDateLabel} onChange={(e) => setNewDateLabel(e.target.value)} placeholder="Label (e.g. Anniversary)" className="h-7 text-xs flex-1" />
+            <input type="date" value={newDateValue} onChange={(e) => setNewDateValue(e.target.value)} className="text-xs bg-transparent border rounded px-1 h-7 outline-none w-28" />
+            <Button type="submit" size="icon-sm" variant="ghost" className="h-7 w-7"><Send size={12} /></Button>
+          </form>
         </Section>
 
         {connectedNodes.length > 0 && (
