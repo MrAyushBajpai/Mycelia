@@ -7,6 +7,7 @@ import { ContactDetail } from "@/components/panels/contact-detail"
 import { Toolbar } from "@/components/toolbar"
 import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
+import { SearchBar } from "@/components/search-bar"
 
 const SEED_NODES = [
   { id: "c-family", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Family", color: "#ef4444" } },
@@ -57,6 +58,7 @@ export default function Home() {
           </div>
           <span className="text-sm font-medium text-white/50 tracking-wider">MYCELIA</span>
         </div>
+        <SearchBar />
         <Toolbar />
         <CommandBar />
         <GraphCanvas />
