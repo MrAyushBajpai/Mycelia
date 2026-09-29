@@ -190,7 +190,7 @@ export function computeLayout(
       const t = simNodes.find(n => n.id === (e.target as any).id || n.id === e.target)
       if (s && t && !t.isPinned) {
         if (t.x < s.x + LAYOUT_CONFIG.columnGap * 0.8) {
-          t.vx! += (s.x + LAYOUT_CONFIG.columnGap * 0.8 - t.x) * alpha * 0.3
+          ;(t as any).vx += (s.x + LAYOUT_CONFIG.columnGap * 0.8 - t.x) * alpha * 0.3
         }
       }
     })

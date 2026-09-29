@@ -85,11 +85,12 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   autoLayout: async (options) => {
     const { computeLayout } = await import('@/lib/layout')
     const { nodes, edges } = get()
-    const layoutedPositions = computeLayout(nodes, edges, options)
+    const layoutedNodes = computeLayout(nodes, edges, options)
+    const posMap = new Map(layoutedNodes.map(n => [n.id, n.position]))
     
     set({
       nodes: nodes.map(n => {
-        const pos = layoutedPositions.get(n.id)
+        const pos = posMap.get(n.id)
         if (pos) {
           return {
             ...n,
