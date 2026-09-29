@@ -164,6 +164,11 @@ export function CommandBar() {
               placeholder="Log interaction... e.g. 'Coffee with @Alex on friday'"
               className="w-full text-xl bg-transparent outline-none z-10 relative placeholder:text-white/20 caret-primary text-transparent"
               spellCheck={false}
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
+              data-form-type="other"
               maxLength={2000}
             />
             {/* The styled overlay sitting perfectly beneath the text */}
