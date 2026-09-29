@@ -9,23 +9,27 @@ import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 
 const SEED_NODES = [
-  { id: "c-family", type: "cluster", position: { x: 0, y: 150 }, data: { label: "Family", color: "#ef4444" } },
-  { id: "c-work", type: "cluster", position: { x: 500, y: 0 }, data: { label: "Work", color: "#3b82f6" } },
+  { id: "c-family", type: "cluster", position: { x: 500, y: 150 }, data: { label: "Family", color: "#ef4444" } },
+  { id: "c-work", type: "cluster", position: { x: 500, y: 0 }, data: { label: "Design Team", color: "#3b82f6" } },
   { id: "c-college", type: "cluster", position: { x: 500, y: 300 }, data: { label: "College", color: "#10b981" } },
-  { id: "p-1", type: "person", position: { x: 200, y: 100 }, data: { label: "Mom" } },
-  { id: "p-2", type: "person", position: { x: 200, y: 220 }, data: { label: "Dad" } },
-  { id: "p-3", type: "person", position: { x: 350, y: 50 }, data: { label: "Alex" } },
-  { id: "p-4", type: "person", position: { x: 350, y: 160 }, data: { label: "Sarah" } },
-  { id: "p-5", type: "person", position: { x: 350, y: 280 }, data: { label: "Jordan" } },
+  { id: "p-mom", type: "person", position: { x: 200, y: 100 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString() } },
+  { id: "p-dad", type: "person", position: { x: 200, y: 220 }, data: { label: "Dad" } },
+  { id: "p-alex", type: "person", position: { x: 350, y: 50 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(Date.now() - 15 * 86400000).toISOString(), nextActionReason: "Project check-in" } },
+  { id: "p-sarah", type: "person", position: { x: 350, y: 160 }, data: { label: "Sarah", cadenceDays: 30 } },
+  { id: "p-jordan", type: "person", position: { x: 350, y: 280 }, data: { label: "Jordan", customDates: { "Birthday": new Date().toISOString() } } },
 ]
 
 const SEED_EDGES = [
-  { id: "e-1", source: "c-family", target: "p-1", animated: false },
-  { id: "e-2", source: "c-family", target: "p-2", animated: false },
-  { id: "e-3", source: "p-3", target: "c-work", animated: false },
-  { id: "e-4", source: "p-4", target: "c-work", animated: false },
-  { id: "e-5", source: "p-5", target: "c-college", animated: false },
-  { id: "e-6", source: "p-4", target: "c-college", animated: false },
+  // People belonging to contexts (Person -> Circle)
+  { id: "e-1", source: "p-mom", target: "c-family", label: "Mother", animated: false },
+  { id: "e-2", source: "p-dad", target: "c-family", label: "Father", animated: false },
+  { id: "e-3", source: "p-alex", target: "c-work", label: "Manager", animated: false },
+  { id: "e-4", source: "p-sarah", target: "c-work", label: "Peer", animated: false },
+  { id: "e-5", source: "p-jordan", target: "c-college", label: "Alumni", animated: false },
+  { id: "e-6", source: "p-sarah", target: "c-college", label: "Alumni", animated: false },
+  
+  // Direct person-to-person relationships
+  { id: "e-7", source: "p-alex", target: "p-sarah", label: "Mentors", animated: false },
 ]
 
 export default function Home() {

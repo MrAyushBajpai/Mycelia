@@ -28,6 +28,10 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "smoothstep",
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.4)" },
   style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.25)" },
+  labelStyle: { fill: "rgba(255, 255, 255, 0.6)", fontSize: 10, fontWeight: 500, letterSpacing: "0.05em" },
+  labelBgStyle: { fill: "#09090b", fillOpacity: 0.9 },
+  labelBgPadding: [6, 4],
+  labelBgBorderRadius: 4,
   animated: true,
 }
 
