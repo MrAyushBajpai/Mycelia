@@ -78,7 +78,7 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
                 id="person-cluster"
                 value={clusterId}
                 onChange={(e) => setClusterId(e.target.value)}
-                className="w-full h-9 rounded-md border bg-transparent px-3 text-sm"
+                className="w-full h-9 rounded-md border border-white/10 bg-zinc-900 text-white px-3 text-sm [color-scheme:dark]"
               >
                 <option value="" className="bg-zinc-900 text-white">None</option>
                 {clusters.map((c) => (

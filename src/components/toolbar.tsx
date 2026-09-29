@@ -69,7 +69,7 @@ export function Toolbar() {
               placeholder="Search..."
               className="bg-transparent text-sm text-white/90 outline-none w-36 placeholder:text-white/30"
             />
-            {!query && <kbd className="text-[10px] text-white/20 bg-white/[0.04] border border-white/[0.06] rounded px-1 py-0.5 font-mono">⌘K</kbd>}
+
           </div>
           {showResults && results.length > 0 && (
             <div className="absolute bottom-12 left-0 w-full bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden p-1">
