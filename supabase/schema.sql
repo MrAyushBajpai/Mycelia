@@ -5,8 +5,8 @@
 create table clusters (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
-  color text default '#6366f1',
+  name varchar(100) not null check (char_length(trim(name)) > 0),
+  color varchar(7) default '#6366f1' check (color ~* '^#[0-9a-f]{6}$'),
   created_at timestamptz default now()
 );
 
@@ -14,13 +14,13 @@ create table clusters (
 create table contacts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
-  email text,
-  phone text,
-  notes text,
+  name varchar(100) not null check (char_length(trim(name)) > 0),
+  email varchar(255),
+  phone varchar(50),
+  notes varchar(2000),
   avatar_url text,
-  birthday date,
-  cadence_days integer, -- remind every N days
+  custom_dates jsonb default '{}'::jsonb,
+  cadence_days integer check (cadence_days > 0), -- remind every N days
   last_contacted_at timestamptz,
   created_at timestamptz default now()
 );
@@ -38,7 +38,7 @@ create table edges (
   user_id uuid not null references auth.users(id) on delete cascade,
   source_id uuid not null references contacts(id) on delete cascade,
   target_id uuid not null references contacts(id) on delete cascade,
-  label text not null, -- "married to", "works with", "introduced by"
+  label varchar(100) not null check (char_length(trim(label)) > 0), -- "married to", "works with"
   created_at timestamptz default now()
 );
 
@@ -47,7 +47,7 @@ create table interactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   contact_id uuid not null references contacts(id) on delete cascade,
-  note text not null,
+  note varchar(2000) not null check (char_length(trim(note)) > 0),
   occurred_at timestamptz default now(),
   created_at timestamptz default now()
 );

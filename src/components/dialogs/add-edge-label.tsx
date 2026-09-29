@@ -50,6 +50,7 @@ export function AddEdgeLabelDialog({ open, connection, onOpenChange }: Props) {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder='e.g. "married to", "works with"'
+              maxLength={100}
               autoFocus
             />
           </div>

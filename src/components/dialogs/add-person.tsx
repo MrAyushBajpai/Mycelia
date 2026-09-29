@@ -55,15 +55,15 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="person-name">Name *</Label>
-            <Input id="person-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sarah" autoFocus />
+            <Input id="person-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Sarah" maxLength={100} autoFocus />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="person-email">Email</Label>
-            <Input id="person-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="optional" />
+            <Input id="person-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="optional" maxLength={255} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="person-phone">Phone</Label>
-            <Input id="person-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="optional" />
+            <Input id="person-phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="optional" maxLength={50} />
           </div>
           {clusters.length > 0 && (
             <div className="space-y-1.5">

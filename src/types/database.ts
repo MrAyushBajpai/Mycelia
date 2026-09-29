@@ -14,7 +14,7 @@ export type Contact = {
   phone: string | null
   notes: string | null
   avatar_url: string | null
-  birthday: string | null
+  custom_dates: Record<string, string>
   cadence_days: number | null
   last_contacted_at: string | null
   created_at: string

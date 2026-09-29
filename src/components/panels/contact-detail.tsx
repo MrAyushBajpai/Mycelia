@@ -87,10 +87,10 @@ export function ContactDetail() {
 
       <div className="space-y-5 text-sm flex-1">
         <Section title="Details">
-          <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} />
-          <EditableField label="Phone" value={data.phone as string} onChange={(v) => updateField("phone", v)} />
-          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" />
-          <EditableField label="Notes" value={data.notes as string} onChange={(v) => updateField("notes", v)} />
+          <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} maxLength={255} />
+          <EditableField label="Phone" value={data.phone as string} onChange={(v) => updateField("phone", v)} maxLength={50} />
+          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" min={1} />
+          <EditableField label="Notes" value={data.notes as string} onChange={(v) => updateField("notes", v)} maxLength={2000} />
         </Section>
 
         <Section title="Important Dates">
@@ -106,7 +106,7 @@ export function ContactDetail() {
             </div>
           ))}
           <form onSubmit={handleAddCustomDate} className="flex gap-1 mt-2">
-            <Input value={newDateLabel} onChange={(e) => setNewDateLabel(e.target.value)} placeholder="Label (e.g. Anniversary)" className="h-7 text-xs flex-1" />
+            <Input value={newDateLabel} onChange={(e) => setNewDateLabel(e.target.value)} placeholder="Label (e.g. Anniversary)" maxLength={50} className="h-7 text-xs flex-1" />
             <input type="date" value={newDateValue} onChange={(e) => setNewDateValue(e.target.value)} className="text-xs bg-transparent border rounded px-1 h-7 outline-none w-28" />
             <Button type="submit" size="icon-sm" variant="ghost" className="h-7 w-7"><Send size={12} /></Button>
           </form>
@@ -130,6 +130,7 @@ export function ContactDetail() {
                 value={logInput}
                 onChange={(e) => setLogInput(e.target.value)}
                 placeholder="Log an interaction..."
+                maxLength={2000}
                 className="h-8 text-xs"
               />
               <Button type="submit" size="icon-sm" variant="ghost">
@@ -184,11 +185,15 @@ function EditableField({
   value,
   onChange,
   type = "text",
+  maxLength,
+  min,
 }: {
   label: string
   value: string | null | undefined
   onChange: (v: string) => void
   type?: string
+  maxLength?: number
+  min?: number
 }) {
   return (
     <div className="flex items-center justify-between py-1 gap-2">
@@ -198,6 +203,8 @@ function EditableField({
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         placeholder="—"
+        maxLength={maxLength}
+        min={min}
         className="bg-transparent text-right text-sm outline-none w-full min-w-0 placeholder:text-muted-foreground/50 focus:underline"
       />
     </div>

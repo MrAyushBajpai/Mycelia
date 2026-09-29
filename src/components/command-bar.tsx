@@ -140,6 +140,7 @@ export function CommandBar() {
               placeholder="Log interaction... e.g. 'Coffee with @Alex on 2024-05-12'"
               className="w-full text-lg bg-transparent outline-none z-10 relative placeholder:text-muted-foreground/50 caret-primary text-transparent"
               spellCheck={false}
+              maxLength={2000}
             />
             {/* The styled overlay sitting perfectly beneath the text */}
             <div className="absolute top-4 left-4 right-4 text-lg pointer-events-none whitespace-pre-wrap break-words" aria-hidden="true">

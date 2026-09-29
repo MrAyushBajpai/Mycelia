@@ -51,6 +51,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. College, Book Club"
+              maxLength={100}
               autoFocus
             />
           </div>
