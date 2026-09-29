@@ -47,6 +47,7 @@ export default function CirclesPage() {
 
       return {
         ...c,
+        members,
         memberCount: members.length,
         lastActivity,
         label: String(data.label || ""),
@@ -129,12 +130,11 @@ export default function CirclesPage() {
 
           {/* Table */}
           <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl pb-4">
-            <div className="grid grid-cols-[auto_1.5fr_1fr_1.5fr_2fr_auto] gap-4 p-4 border-b border-white/5 text-xs font-semibold tracking-wider text-white/40 uppercase items-center">
+            <div className="grid grid-cols-[auto_1.5fr_1.5fr_1.5fr_auto] gap-4 p-4 border-b border-white/5 text-xs font-semibold tracking-wider text-white/40 uppercase items-center">
               <div className="w-5"></div>
               <div>Circle Name</div>
               <div>Members</div>
               <div>Last Activity</div>
-              <div>Notes</div>
               <div className="w-8"></div>
             </div>
 
@@ -147,7 +147,7 @@ export default function CirclesPage() {
                   <div 
                     key={circle.id}
                     onClick={() => selectNode(circle.id)}
-                    className={`grid grid-cols-[auto_1.5fr_1fr_1.5fr_2fr_auto] gap-4 p-4 items-center text-sm border-b border-white/[0.02] last:border-0 cursor-pointer transition-colors ${isSelected ? "bg-[#ea580c]/[0.02]" : "hover:bg-white/[0.02]"}`}
+                    className={`grid grid-cols-[auto_1.5fr_1.5fr_1.5fr_auto] gap-4 p-4 items-center text-sm border-b border-white/[0.02] last:border-0 cursor-pointer transition-colors ${isSelected ? "bg-[#ea580c]/[0.02]" : "hover:bg-white/[0.02]"}`}
                     style={isSelected ? { outline: '1px solid rgba(234,88,12,0.3)', outlineOffset: '-1px' } : {}}
                   >
                     <div className="w-5 flex justify-center">
@@ -166,16 +166,25 @@ export default function CirclesPage() {
                       <span className="font-medium text-white/90">{circle.label}</span>
                     </div>
 
-                    <div className="text-white/60">
-                      {circle.memberCount} members
+                    <div className="flex items-center gap-2">
+                      <div className="flex -space-x-1.5">
+                        {circle.members.slice(0, 3).map((m: any) => (
+                          <div 
+                            key={m.id} 
+                            className="w-6 h-6 rounded-full bg-[#1c1c1e] border border-white/10 flex items-center justify-center text-[10px] font-medium text-white/80"
+                            title={String(m.data.label)}
+                          >
+                            {String(m.data.label).charAt(0).toUpperCase()}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-white/60 text-xs">
+                        {circle.memberCount > 3 ? `+${circle.memberCount - 3}` : (circle.memberCount === 0 ? "0 members" : "")}
+                      </span>
                     </div>
 
                     <div className="text-white/60 truncate">
                       {lastActivityStr}
-                    </div>
-
-                    <div className="text-white/40 truncate text-[13px]">
-                      {circle.description || "-"}
                     </div>
 
                     <div className="w-8 flex justify-center relative group">

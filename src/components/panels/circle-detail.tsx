@@ -1,11 +1,15 @@
 "use client"
 
 import { useGraphStore } from "@/stores/graph-store"
+import { useInteractionStore, Interaction } from "@/stores/interaction-store"
 import { X, Edit2, Plus } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 export function CircleDetail() {
   const { nodes, edges, selectedNodeId, selectNode } = useGraphStore()
+  
+  // Real interactions from the store
+  const { interactionsByContact } = useInteractionStore()
   
   const selectedNode = nodes.find(n => n.id === selectedNodeId)
   if (!selectedNode || selectedNode.type !== "cluster") return null
@@ -17,15 +21,18 @@ export function CircleDetail() {
   const memberEdges = edges.filter(e => e.target === selectedNode.id)
   const members = memberEdges.map(e => nodes.find(n => n.id === e.source)).filter(Boolean) as typeof nodes
   
-  // Calculate recent activity
-  const activities = members.map(m => {
-    const md = m.data as any
-    return {
+  // Calculate recent activity from real interactions
+  const allActivities = members.flatMap(m => {
+    const contactInteractions = interactionsByContact[m.id] || []
+    return contactInteractions.map((interaction: Interaction) => ({
       person: m,
-      date: md.lastContacted ? new Date(md.lastContacted).getTime() : 0,
-      action: "Interacted"
-    }
-  }).filter(a => a.date > 0).sort((a, b) => b.date - a.date)
+      date: new Date(interaction.occurredAt).getTime(),
+      action: interaction.note
+    }))
+  })
+  
+  // Sort activities by most recent first
+  allActivities.sort((a, b) => b.date - a.date)
   
   return (
     <div className="fixed top-0 right-0 w-[360px] h-full bg-[#0a0a0c] border-l border-white/[0.04] shadow-2xl flex flex-col z-40 transform transition-transform duration-300">
@@ -54,7 +61,6 @@ export function CircleDetail() {
           <div className="flex items-center gap-6 border-b border-white/5 pb-px">
             <button className="text-sm font-medium text-[#ea580c] border-b-2 border-[#ea580c] pb-2 px-1">Overview</button>
             <button className="text-sm font-medium text-white/40 hover:text-white/70 pb-2 px-1">Members</button>
-            <button className="text-sm font-medium text-white/40 hover:text-white/70 pb-2 px-1">Notes</button>
             <button className="text-sm font-medium text-white/40 hover:text-white/70 pb-2 px-1">Activity</button>
           </div>
         </div>
@@ -113,17 +119,19 @@ export function CircleDetail() {
           <div>
             <h3 className="text-sm font-semibold text-white/90 mb-4">Recent Activity</h3>
             <div className="flex flex-col gap-4">
-              {activities.length > 0 ? activities.slice(0, 3).map((act, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#1c1c1e] border border-white/5 flex items-center justify-center flex-shrink-0 text-white/80 font-medium text-xs shadow-sm">
+              {allActivities.length > 0 ? allActivities.slice(0, 5).map((act, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#1c1c1e] border border-white/5 flex items-center justify-center flex-shrink-0 text-white/80 font-medium text-xs shadow-sm mt-0.5">
                     {String(act.person.data.label).charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <div className="text-sm font-medium text-white/90">{String(act.person.data.label)}</div>
-                    <div className="text-xs text-white/40 truncate">{act.action}</div>
-                  </div>
-                  <div className="text-[11px] text-white/30 whitespace-nowrap">
-                    {formatDistanceToNow(act.date)} ago
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <span className="text-sm font-medium text-white/90 truncate">{String(act.person.data.label)}</span>
+                      <span className="text-[11px] text-white/30 whitespace-nowrap flex-shrink-0">
+                        {formatDistanceToNow(act.date)} ago
+                      </span>
+                    </div>
+                    <div className="text-[13px] text-white/60 line-clamp-2 leading-snug">{act.action}</div>
                   </div>
                 </div>
               )) : (
