@@ -167,7 +167,7 @@ export function ContactDetail() {
           <DisplayField label="Last interaction" value={lastContactedStr} />
           <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
           <div className="flex flex-col mt-1">
-            <span className="text-[12px] font-normal text-white/40 py-1">Reason for contact</span>
+            <span className="text-[12px] font-normal text-white/40 py-1">Reason for next contact</span>
             <textarea
               value={(data.nextActionReason as string) || ""}
               onChange={(e) => updateField("nextActionReason", e.target.value)}
