@@ -12,6 +12,8 @@ import {
 import "@xyflow/react/dist/style.css"
 
 import { useGraphStore } from "@/stores/graph-store"
+import { useNotificationStore } from "@/stores/notification-store"
+import { useTimeStore } from "@/stores/time-store"
 import { PersonNode } from "./person-node"
 import { ClusterNode } from "./cluster-node"
 import { AddEdgeLabelDialog } from "@/components/dialogs/add-edge-label"
@@ -61,7 +63,14 @@ function DynamicBackground() {
 
 export function GraphCanvas() {
   const { nodes, edges, selectedNodeId, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
+  const syncGraph = useNotificationStore((s) => s.syncGraph)
+  const now = useTimeStore((s) => s.now)
+
   const [pendingConnection, setPendingConnection] = useState<Connection | null>(null)
+
+  useEffect(() => {
+    syncGraph(nodes, now)
+  }, [nodes, now, syncGraph])
 
   const handleConnect = useCallback((connection: Connection) => {
     setPendingConnection(connection)

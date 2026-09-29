@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils"
 import { useTimeStore } from "@/stores/time-store"
 import { useGraphStore } from "@/stores/graph-store"
 
+import { useNotificationStore } from "@/stores/notification-store"
+
 export type PersonNodeData = {
   label: string
   lastContacted?: string | null
@@ -20,12 +22,17 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
   const edges = useGraphStore((s) => s.edges)
   const nodes = useGraphStore((s) => s.nodes)
 
+  const notifications = useNotificationStore((s) => s.notifications)
+  const unreadForNode = notifications.filter(n => !n.isRead && n.nodeId === id)
+  
+  const isEvent = unreadForNode.some(n => n.type === 'event')
+  const isOverdue = unreadForNode.some(n => n.type === 'overdue')
+  const isDueSoon = unreadForNode.some(n => n.type === 'due')
+
   const [isHovering, setIsHovering] = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  let isOverdue = false
-  let isDueSoon = false
   let lastContactedStr = "Never"
 
   if (d.lastContacted) {
@@ -38,14 +45,6 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
     if (diffDays === 0) lastContactedStr = "Today"
     else if (diffDays === 1) lastContactedStr = "Yesterday"
     else lastContactedStr = `${diffDays} days ago`
-    
-    if (d.cadenceDays) {
-      const daysUntilDue = d.cadenceDays - diffDays
-      if (daysUntilDue < 0) isOverdue = true
-      else if (daysUntilDue <= 2) isDueSoon = true
-    }
-  } else if (d.cadenceDays) {
-    isOverdue = true
   }
 
   const connectedLabels = useMemo(() => {
@@ -85,23 +84,29 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
           selected 
             ? "border-primary/50 scale-105" 
             : "hover:border-white/20 hover:scale-[1.03]",
-          isOverdue && !selected && "border-destructive/60",
-          isDueSoon && !selected && "border-amber-500/60"
+          isEvent && !selected && "border-purple-500/60",
+          isOverdue && !isEvent && !selected && "border-destructive/60",
+          isDueSoon && !isEvent && !isOverdue && !selected && "border-amber-500/60"
         )}
         style={{
           boxShadow: selected
             ? '0 0 24px rgba(0,240,255,0.2), 0 0 8px rgba(0,240,255,0.1)'
-            : isOverdue && !selected
-              ? '0 0 16px rgba(255,85,0,0.2)'
-              : isDueSoon && !selected
-                ? '0 0 16px rgba(245,158,11,0.2)'
-                : 'none',
+            : isEvent && !selected
+              ? '0 0 16px rgba(168,85,247,0.2)'
+              : isOverdue && !selected
+                ? '0 0 16px rgba(255,85,0,0.2)'
+                : isDueSoon && !selected
+                  ? '0 0 16px rgba(245,158,11,0.2)'
+                  : 'none',
         }}
       >
-        {isOverdue && (
+        {isEvent && (
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-purple-500 rounded-full animate-pulse" />
+        )}
+        {isOverdue && !isEvent && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
         )}
-        {isDueSoon && !isOverdue && (
+        {isDueSoon && !isOverdue && !isEvent && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
         <Handle type="target" position={Position.Left} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { AddPersonDialog } from "@/components/dialogs/add-person"
 import { AddClusterDialog } from "@/components/dialogs/add-cluster"
 import { ImportCsvDialog } from "@/components/dialogs/import-csv"
+import { NotificationMenu } from "@/components/notification-menu"
 import { useGraphStore } from "@/stores/graph-store"
 import { useReactFlow } from "@xyflow/react"
 
@@ -129,6 +130,8 @@ export function Toolbar() {
           <span className="text-white/90">Log</span>
           <kbd className="text-[10px] text-white/25 bg-white/[0.04] border border-white/[0.06] rounded px-1 py-0.5 font-mono ml-1">⌘K</kbd>
         </Button>
+        <div className="w-px h-5 bg-white/[0.06]" />
+        <NotificationMenu />
         <div className="w-px h-5 bg-white/[0.06]" />
         <div className="relative">
           <div className="flex items-center gap-1.5 px-3 h-8 rounded-full hover:bg-white/5 transition-colors focus-within:bg-white/5 focus-within:ring-1 focus-within:ring-white/20">
