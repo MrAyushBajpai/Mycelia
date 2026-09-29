@@ -31,26 +31,12 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 function DynamicBackground() {
   const [mouse, setMouse] = useState({ x: -1000, y: -1000 })
-  const [trail, setTrail] = useState({ x: -1000, y: -1000 })
 
   useEffect(() => {
     const handleMove = (e: PointerEvent) => setMouse({ x: e.clientX, y: e.clientY })
     window.addEventListener("pointermove", handleMove)
     return () => window.removeEventListener("pointermove", handleMove)
   }, [])
-
-  useEffect(() => {
-    let frameId: number
-    const loop = () => {
-      setTrail((prev) => ({
-        x: prev.x + (mouse.x - prev.x) * 0.15,
-        y: prev.y + (mouse.y - prev.y) * 0.15,
-      }))
-      frameId = requestAnimationFrame(loop)
-    }
-    frameId = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(frameId)
-  }, [mouse])
 
   return (
     <div className="pointer-events-none absolute inset-0 z-0 bg-[#09090b] overflow-hidden">
@@ -67,13 +53,6 @@ function DynamicBackground() {
         className="absolute inset-0 transition-opacity duration-300"
         style={{
           background: `radial-gradient(800px circle at ${mouse.x}px ${mouse.y}px, rgba(255,255,255,0.06), transparent 50%)`
-        }}
-      />
-      {/* Cyan trail */}
-      <div 
-        className="absolute inset-0 mix-blend-screen"
-        style={{
-          background: `radial-gradient(150px circle at ${trail.x}px ${trail.y}px, rgba(0,240,255,0.15), transparent 70%)`
         }}
       />
     </div>
