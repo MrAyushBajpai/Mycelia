@@ -16,16 +16,12 @@ export function ContactDetail() {
   const deleteNode = useGraphStore((s) => s.deleteNode)
   const setNodes = useGraphStore((s) => s.setNodes)
   
-  // We only subscribe to edges here so that dragging a node (which updates 'nodes' reference)
-  // doesn't cause a re-render loop via getConnections.
   const edges = useGraphStore((s) => s.edges)
-  
   const interactions = useInteractionStore((s) => s.interactionsByContact[node?.id || ""] || EMPTY_ARRAY)
   const addInteraction = useInteractionStore((s) => s.addInteraction)
 
   const [logInput, setLogInput] = useState("")
   const [logDate, setLogDate] = useState("")
-
   const [newDateLabel, setNewDateLabel] = useState("")
   const [newDateValue, setNewDateValue] = useState("")
 
@@ -34,7 +30,6 @@ export function ContactDetail() {
   const data = node.data as Record<string, unknown>
   const customDates = (data.customDates as Record<string, string>) || {}
   
-  // Compute connections manually to avoid store thrashing on drag
   const connectedNodes = edges
     .filter((e) => e.source === node.id || e.target === node.id)
     .map((e) => {
@@ -42,6 +37,48 @@ export function ContactDetail() {
       const other = useGraphStore.getState().nodes.find((n) => n.id === otherId)
       return { edge: e, name: other ? String((other.data as Record<string, unknown>).label) : "?" }
     })
+
+  // Computed Follow-up Logic
+  const lastContactedDate = data.lastContacted ? new Date(data.lastContacted as string) : null
+  const cadence = data.cadenceDays as number | null
+
+  let lastContactedStr = "Never"
+  if (lastContactedDate) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const last = new Date(lastContactedDate)
+    last.setHours(0, 0, 0, 0)
+    const days = Math.floor((today.getTime() - last.getTime()) / 86400000)
+    
+    if (days === 0) lastContactedStr = "Today"
+    else if (days === 1) lastContactedStr = "Yesterday"
+    else lastContactedStr = `${days} days ago`
+  }
+
+  let nextContactStr = "—"
+  let isOverdue = false
+  if (lastContactedDate && cadence) {
+    const nextDate = new Date(lastContactedDate.getTime() + cadence * 86400000)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const next = new Date(nextDate)
+    next.setHours(0, 0, 0, 0)
+    const diffDays = Math.ceil((next.getTime() - today.getTime()) / 86400000)
+    
+    if (diffDays < 0) {
+      nextContactStr = `Overdue by ${Math.abs(diffDays)} days`
+      isOverdue = true
+    } else if (diffDays === 0) {
+      nextContactStr = "Today"
+    } else if (diffDays === 1) {
+      nextContactStr = "Tomorrow"
+    } else {
+      nextContactStr = nextDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+    }
+  } else if (!lastContactedDate && cadence) {
+    nextContactStr = "Overdue (Never contacted)"
+    isOverdue = true
+  }
 
   function handleLog(e: React.FormEvent) {
     e.preventDefault()
@@ -99,58 +136,44 @@ export function ContactDetail() {
   }
 
   return (
-    <aside className="absolute right-3 top-3 bottom-3 w-[calc(100vw-24px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] p-5 z-40 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
-      <div className="flex items-center justify-between mb-5">
+    <aside className="absolute right-3 top-3 bottom-3 w-[calc(100vw-24px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-[360px] rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] p-5 z-40 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-sm font-semibold text-white/50 uppercase">
+          <div className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center text-sm font-semibold text-white/50 uppercase">
             {String(data.label).charAt(0)}
           </div>
-          <h2 className="text-lg font-semibold tracking-tight">{String(data.label)}</h2>
+          <h2 className="text-xl font-semibold tracking-tight">{String(data.label)}</h2>
         </div>
         <button onClick={() => selectNode(null)} className="text-white/30 hover:text-white/70 transition-colors p-1 rounded-lg hover:bg-white/[0.06]">
-          <X size={16} />
+          <X size={18} />
         </button>
       </div>
 
-      <div className="space-y-5 text-sm flex-1">
-        <Section title="Details">
+      <div className="space-y-6 text-sm flex-1">
+        
+        <Section title="Contact">
           <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} maxLength={255} />
           <EditableField label="Phone" value={data.phone as string} onChange={(v) => updateField("phone", v)} maxLength={50} />
-          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" min={1} />
-          <EditableField label="Notes" value={data.notes as string} onChange={(v) => updateField("notes", v)} maxLength={2000} />
         </Section>
 
-        <Section title="Important Dates">
-          {Object.entries(customDates).map(([lbl, val]) => (
-            <div key={lbl} className="flex items-center justify-between py-1 group">
-              <span className="text-muted-foreground">{lbl}</span>
-              <div className="flex items-center gap-2">
-                <span>{new Date(val).toLocaleDateString()}</span>
-                <button onClick={() => removeCustomDate(lbl)} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X size={12} />
-                </button>
-              </div>
-            </div>
-          ))}
-          <form onSubmit={handleAddCustomDate} className="flex gap-1 mt-2">
-            <Input value={newDateLabel} onChange={(e) => setNewDateLabel(e.target.value)} placeholder="Label (e.g. Anniversary)" maxLength={50} className="h-7 text-xs flex-1" />
-            <input type="date" value={newDateValue} onChange={(e) => setNewDateValue(e.target.value)} className="text-xs bg-transparent border rounded px-1 h-7 outline-none w-28" />
-            <Button type="submit" size="icon-sm" variant="ghost" className="h-7 w-7"><Send size={12} /></Button>
-          </form>
+        <Section title="Follow-Up">
+          <DisplayField label="Last contacted" value={lastContactedStr} />
+          <DisplayField label="Next contact" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
+          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" min={1} />
         </Section>
 
         {connectedNodes.length > 0 && (
           <Section title="Connections">
             {connectedNodes.map(({ edge, name }) => (
-              <div key={edge.id} className="flex items-center gap-2 py-1">
-                <span className="text-muted-foreground text-xs">{edge.label || "—"}</span>
-                <span className="font-medium">{name}</span>
+              <div key={edge.id} className="flex items-center justify-between py-1">
+                <span className="text-muted-foreground">{name}</span>
+                <span className="text-white/40 text-xs px-2 py-0.5 rounded-full border border-white/10">{edge.label || "Connected"}</span>
               </div>
             ))}
           </Section>
         )}
 
-        <Section title="Interactions">
+        <Section title="Recent Interactions">
           <form onSubmit={handleLog} className="flex flex-col gap-1.5 mb-3">
             <div className="flex gap-1.5">
               <Input
@@ -158,9 +181,9 @@ export function ContactDetail() {
                 onChange={(e) => setLogInput(e.target.value)}
                 placeholder="Log an interaction..."
                 maxLength={2000}
-                className="h-8 text-xs"
+                className="h-8 text-xs bg-black/20 border-white/10"
               />
-              <Button type="submit" size="icon-sm" variant="ghost">
+              <Button type="submit" size="icon-sm" variant="ghost" className="bg-black/20 border border-white/10 hover:bg-white/10">
                 <Send size={14} />
               </Button>
             </div>
@@ -169,30 +192,58 @@ export function ContactDetail() {
               value={logDate}
               onChange={(e) => setLogDate(e.target.value)}
               max={new Date().toISOString().split("T")[0]}
-              className="text-xs text-muted-foreground bg-transparent outline-none self-start"
+              className="text-[11px] px-1 py-0.5 text-muted-foreground bg-transparent outline-none self-start"
               title="Date of interaction (defaults to today)"
             />
           </form>
           {interactions.length === 0 ? (
-            <p className="text-muted-foreground">No interactions logged.</p>
+            <p className="text-muted-foreground/50 italic text-xs">No interactions logged yet.</p>
           ) : (
-            <div className="space-y-2">
-              {interactions.map((i) => (
-                <div key={i.id} className="border-l border-white/[0.08] pl-3 py-1.5">
-                  <p className="text-sm">{i.note}</p>
-                  <p className="text-[11px] text-white/30 mt-0.5">
-                    {new Date(i.occurredAt).toLocaleDateString()}
-                  </p>
+            <div className="space-y-1 mt-3">
+              {interactions.slice(0, 5).map((i) => (
+                <div key={i.id} className="flex items-start justify-between py-1.5 border-t border-white/5 first:border-0">
+                  <p className="text-sm pr-4 line-clamp-2 leading-relaxed">{i.note}</p>
+                  <span className="text-[10px] text-white/30 shrink-0 mt-0.5 tabular-nums">
+                    {new Date(i.occurredAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  </span>
                 </div>
               ))}
             </div>
           )}
         </Section>
+
+        <Section title="Important Dates">
+          {Object.entries(customDates).map(([lbl, val]) => (
+            <div key={lbl} className="flex items-center justify-between py-1 group">
+              <span className="text-muted-foreground">{lbl}</span>
+              <div className="flex items-center gap-2">
+                <span>{new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                <button onClick={() => removeCustomDate(lbl)} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                  <X size={12} />
+                </button>
+              </div>
+            </div>
+          ))}
+          <form onSubmit={handleAddCustomDate} className="flex gap-1.5 mt-2">
+            <Input value={newDateLabel} onChange={(e) => setNewDateLabel(e.target.value)} placeholder="Label (e.g. Birthday)" maxLength={50} className="h-7 text-xs flex-1 bg-black/20 border-white/10" />
+            <input type="date" value={newDateValue} onChange={(e) => setNewDateValue(e.target.value)} className="text-xs bg-black/20 border border-white/10 rounded px-1.5 h-7 outline-none w-28 text-muted-foreground" />
+            <Button type="submit" size="icon-sm" variant="ghost" className="h-7 w-7 bg-black/20 border border-white/10 hover:bg-white/10"><Send size={10} /></Button>
+          </form>
+        </Section>
+
+        <Section title="Notes">
+          <textarea
+            value={(data.notes as string) || ""}
+            onChange={(e) => updateField("notes", e.target.value)}
+            placeholder="Add background context..."
+            className="w-full bg-black/10 border border-white/5 rounded-lg p-2.5 text-sm min-h-[80px] outline-none focus:border-primary/30 transition-colors resize-y placeholder:text-muted-foreground/30"
+          />
+        </Section>
       </div>
 
-      <Button variant="ghost" size="sm" className="w-full mt-4 text-white/30 hover:text-destructive hover:bg-destructive/10" onClick={() => deleteNode(node.id)}>
+      <Button variant="ghost" size="sm" className="w-full mt-6 text-white/30 hover:text-destructive hover:bg-destructive/10" onClick={() => deleteNode(node.id)}>
         <Trash2 size={13} data-icon="inline-start" />
-        Remove
+        Remove Person
       </Button>
     </aside>
   )
@@ -200,9 +251,11 @@ export function ContactDetail() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30 mb-2.5">{title}</h3>
-      {children}
+    <div className="flex flex-col">
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/20 mb-3">{title}</h3>
+      <div className="flex flex-col gap-0.5">
+        {children}
+      </div>
     </div>
   )
 }
@@ -223,7 +276,7 @@ function EditableField({
   min?: number
 }) {
   return (
-    <div className="flex items-center justify-between py-1 gap-2">
+    <div className="flex items-center justify-between py-1.5 gap-4 group">
       <span className="text-muted-foreground shrink-0">{label}</span>
       <input
         type={type}
@@ -232,8 +285,27 @@ function EditableField({
         placeholder="—"
         maxLength={maxLength}
         min={min}
-        className="bg-transparent text-right text-sm outline-none w-full min-w-0 placeholder:text-muted-foreground/50 focus:underline"
+        className="bg-transparent text-right text-sm outline-none w-full min-w-0 text-white/90 placeholder:text-muted-foreground/30 focus:text-primary transition-colors"
       />
+    </div>
+  )
+}
+
+function DisplayField({
+  label,
+  value,
+  highlight = false,
+  alert = false
+}: {
+  label: string
+  value: string
+  highlight?: boolean
+  alert?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between py-1.5 gap-4">
+      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className={`text-sm text-right ${alert ? 'text-destructive font-semibold' : highlight ? 'text-primary font-medium' : 'text-white/90'}`}>{value}</span>
     </div>
   )
 }
