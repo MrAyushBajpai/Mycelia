@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 
@@ -8,7 +9,7 @@ export type ClusterNodeData = {
   color?: string
 }
 
-export function ClusterNode({ data, selected }: NodeProps) {
+export const ClusterNode = memo(function ClusterNode({ data, selected }: NodeProps) {
   const d = data as ClusterNodeData
   const color = d.color || "#6366f1"
 

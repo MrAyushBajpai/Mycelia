@@ -21,6 +21,7 @@ type GraphState = {
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
   deleteNode: (id: string) => void
+  getConnections: (nodeId: string) => { edge: Edge; name: string }[]
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -50,6 +51,16 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       nodes: nodes.filter((n) => n.id !== id),
       edges: edges.filter((e) => e.source !== id && e.target !== id),
       selectedNodeId: selectedNodeId === id ? null : selectedNodeId,
+    })
+  },
+  
+  getConnections: (nodeId) => {
+    const { nodes, edges } = get()
+    const connections = edges.filter((e) => e.source === nodeId || e.target === nodeId)
+    return connections.map((e) => {
+      const otherId = e.source === nodeId ? e.target : e.source
+      const other = nodes.find((n) => n.id === otherId)
+      return { edge: e, name: other ? String((other.data as Record<string, unknown>).label) : "?" }
     })
   },
 }))

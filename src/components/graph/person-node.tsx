@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 
@@ -9,7 +10,7 @@ export type PersonNodeData = {
   cadenceDays?: number | null
 }
 
-export function PersonNode({ data, selected }: NodeProps) {
+export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps) {
   const d = data as PersonNodeData
   
   let isOverdue = false

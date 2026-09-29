@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export function ContactDetail() {
-  const { nodes, edges, selectedNodeId, selectNode, deleteNode, setNodes } = useGraphStore()
+  const { nodes, selectedNodeId, selectNode, deleteNode, setNodes, getConnections } = useGraphStore()
   const { addInteraction, getByContact } = useInteractionStore()
   const [logInput, setLogInput] = useState("")
   const [logDate, setLogDate] = useState("")
@@ -23,12 +23,7 @@ export function ContactDetail() {
   const customDates = (data.customDates as Record<string, string>) || {}
   
   const interactions = getByContact(node.id)
-  const connections = edges.filter((e) => e.source === node.id || e.target === node.id)
-  const connectedNodes = connections.map((e) => {
-    const otherId = e.source === node.id ? e.target : e.source
-    const other = nodes.find((n) => n.id === otherId)
-    return { edge: e, name: other ? String((other.data as Record<string, unknown>).label) : "?" }
-  })
+  const connectedNodes = getConnections(node.id)
 
   function handleLog(e: React.FormEvent) {
     e.preventDefault()
