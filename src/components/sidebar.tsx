@@ -10,7 +10,6 @@ const NAV_ITEMS = [
   { name: "People", href: "/people", icon: User },
   { name: "Circles", href: "/circles", icon: Users },
   { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Notes", href: "/notes", icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
