@@ -17,21 +17,23 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Collapsed State: Just the Logo/Hamburger */}
+      {/* Collapsed State: Button to open sidebar */}
       {!isOpen && (
-        <div 
-          className="absolute top-5 left-6 z-50 flex items-center gap-2.5 select-none cursor-pointer group"
+        <button 
+          className="absolute top-5 left-6 z-50 flex items-center gap-3 px-3 py-2 -ml-3 -mt-2 rounded-xl bg-transparent hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all cursor-pointer select-none group outline-none"
           onClick={() => setIsOpen(true)}
         >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
-            <Menu size={12} className="text-primary absolute opacity-0 group-hover:opacity-100 transition-opacity" />
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary group-hover:opacity-0 transition-opacity">
-              <circle cx="12" cy="12" r="2" />
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
+          <Menu size={16} className="text-white/40 group-hover:text-white/80 transition-colors" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center transition-colors group-hover:border-primary/40">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary transition-opacity">
+                <circle cx="12" cy="12" r="2" />
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <span className="text-sm font-medium text-white/50 tracking-wider group-hover:text-white/80 transition-colors">MYCELIA</span>
           </div>
-          <span className="text-sm font-medium text-white/50 tracking-wider group-hover:text-white/80 transition-colors">MYCELIA</span>
-        </div>
+        </button>
       )}
 
       {/* Expanded Sidebar */}
