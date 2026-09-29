@@ -30,7 +30,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
     <div
       className={cn(
         "rounded-full border px-4 py-2 transition-all duration-300 cursor-pointer",
-        "bg-white/[0.05] border-white/[0.1] text-white/90",
+        "bg-zinc-900/95 border-white/[0.15] text-white/90",
         selected 
           ? "border-primary/50 scale-105" 
           : "hover:border-white/20 hover:scale-[1.03]",

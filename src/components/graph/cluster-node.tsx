@@ -22,8 +22,8 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
           : "hover:scale-105"
       )}
       style={{ 
-        borderColor: `${color}80`,
-        backgroundColor: `${color}12`,
+        borderColor: `${color}90`,
+        backgroundColor: `${color}26`,
         boxShadow: selected 
           ? `0 0 32px ${color}25, 0 0 12px ${color}15` 
           : 'none',
