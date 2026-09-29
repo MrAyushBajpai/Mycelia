@@ -52,7 +52,7 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
         <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase">
           {d.label.charAt(0)}
         </div>
-        <span className="text-sm font-medium tracking-wide">{d.label}</span>
+        <span className="text-[15px] font-semibold tracking-tight">{d.label}</span>
       </div>
       <Handle type="source" position={Position.Right} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
     </div>

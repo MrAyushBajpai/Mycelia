@@ -157,7 +157,7 @@ export function Toolbar() {
                     return (
                       <button
                         key={`p-${p.id}`}
-                        className={`w-full px-2 py-1.5 text-sm text-left rounded-lg flex items-center gap-2 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
+                        className={`w-full px-2 py-1.5 text-[14px] font-medium text-left rounded-lg flex items-center gap-2 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
                         onMouseDown={() => executeSearchAction({ ...p, _group: "people" })}
                         onMouseEnter={() => setSelectedIndex(idx)}
                       >
@@ -178,7 +178,7 @@ export function Toolbar() {
                     return (
                       <button
                         key={`c-${c.id}`}
-                        className={`w-full px-2 py-1.5 text-sm text-left rounded-lg flex items-center gap-2 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
+                        className={`w-full px-2 py-1.5 text-[12px] font-medium uppercase tracking-[0.1em] text-left rounded-lg flex items-center gap-2 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
                         onMouseDown={() => executeSearchAction({ ...c, _group: "clusters" })}
                         onMouseEnter={() => setSelectedIndex(idx)}
                       >
@@ -199,15 +199,15 @@ export function Toolbar() {
                     return (
                       <button
                         key={`e-${e.id}`}
-                        className={`w-full px-2 py-1.5 text-sm text-left rounded-lg flex items-center gap-1.5 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
+                        className={`w-full px-2 py-1.5 text-left rounded-lg flex items-center gap-1.5 transition-colors ${isSelected ? "bg-primary/20 text-white" : "text-white/80 hover:bg-white/5"}`}
                         onMouseDown={() => executeSearchAction({ ...e, _group: "edges" })}
                         onMouseEnter={() => setSelectedIndex(idx)}
                       >
-                        <span className="font-medium">{e.sourceLabel}</span>
+                        <span className="text-[14px] font-medium">{e.sourceLabel}</span>
                         <ArrowRight size={12} className="text-white/30 mx-0.5" />
-                        <span className={isSelected ? "text-primary font-medium" : "text-white/50"}>{String(e.label)}</span>
+                        <span className={`text-[11px] font-medium uppercase tracking-[0.08em] ${isSelected ? "text-primary" : "text-white/50"}`}>{String(e.label)}</span>
                         <ArrowRight size={12} className="text-white/30 mx-0.5" />
-                        <span className="font-medium">{e.targetLabel}</span>
+                        <span className="text-[14px] font-medium">{e.targetLabel}</span>
                       </button>
                     )
                   })}

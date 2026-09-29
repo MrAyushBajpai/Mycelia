@@ -167,11 +167,11 @@ export function ContactDetail() {
           <DisplayField label="Last contacted" value={lastContactedStr} />
           <DisplayField label="Next contact" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
           <div className="flex items-center justify-between py-1.5 gap-4 group">
-            <span className="text-muted-foreground shrink-0">Schedule</span>
+            <span className="text-[12px] font-normal text-white/40 shrink-0">Schedule</span>
             <select
               value={(data.cadenceDays as number) || ""}
               onChange={(e) => updateField("cadenceDays", e.target.value)}
-              className="bg-transparent text-right text-sm outline-none w-full min-w-0 text-white/90 focus:text-primary transition-colors cursor-pointer appearance-none text-right [&>option]:bg-[#121212] [&>option]:text-white/90"
+              className="bg-transparent text-right text-[13px] font-normal outline-none w-full min-w-0 text-white/90 focus:text-primary transition-colors cursor-pointer appearance-none [&>option]:bg-[#121212] [&>option]:text-white/90"
               style={{ textAlignLast: "right" }}
             >
               <option value="">No schedule</option>
@@ -189,8 +189,8 @@ export function ContactDetail() {
           <Section title="Connections">
             {connectedNodes.map(({ edge, name }) => (
               <div key={edge.id} className="flex items-center justify-between py-1">
-                <span className="text-muted-foreground">{name}</span>
-                <span className="text-white/40 text-xs px-2 py-0.5 rounded-full border border-white/10">{edge.label || "Connected"}</span>
+                <span className="text-[13px] font-normal text-white/90">{name}</span>
+                <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/40">{edge.label || "Connected"}</span>
               </div>
             ))}
           </Section>
@@ -238,9 +238,9 @@ export function ContactDetail() {
         <Section title="Important Dates">
           {Object.entries(customDates).map(([lbl, val]) => (
             <div key={lbl} className="flex items-center justify-between py-1 group">
-              <span className="text-muted-foreground">{lbl}</span>
+              <span className="text-[12px] font-normal text-white/40">{lbl}</span>
               <div className="flex items-center gap-2">
-                <span>{new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                <span className="text-[13px] font-normal text-white/90">{new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                 <button onClick={() => removeCustomDate(lbl)} className="text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                   <X size={12} />
                 </button>
@@ -259,7 +259,7 @@ export function ContactDetail() {
             value={(data.notes as string) || ""}
             onChange={(e) => updateField("notes", e.target.value)}
             placeholder="Add background context..."
-            className="w-full bg-black/10 border border-white/5 rounded-lg p-2.5 text-sm min-h-[80px] outline-none focus:border-primary/30 transition-colors resize-y placeholder:text-muted-foreground/30"
+            className="w-full bg-black/10 border border-white/5 rounded-lg p-2.5 text-[13px] font-normal min-h-[80px] outline-none focus:border-primary/30 transition-colors resize-y placeholder:text-muted-foreground/30"
           />
         </Section>
       </div>
@@ -288,7 +288,7 @@ export function ContactDetail() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col">
-      <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/20 mb-3">{title}</h3>
+      <h3 className="text-[11px] font-medium uppercase tracking-[0.15em] text-white/30 mb-3">{title}</h3>
       <div className="flex flex-col gap-0.5">
         {children}
       </div>
@@ -313,7 +313,7 @@ function EditableField({
 }) {
   return (
     <div className="flex items-center justify-between py-1.5 gap-4 group">
-      <span className="text-muted-foreground shrink-0">{label}</span>
+      <span className="text-[12px] font-normal text-white/40 shrink-0">{label}</span>
       <input
         type={type}
         value={value || ""}
@@ -321,7 +321,7 @@ function EditableField({
         placeholder="—"
         maxLength={maxLength}
         min={min}
-        className="bg-transparent text-right text-sm outline-none w-full min-w-0 text-white/90 placeholder:text-muted-foreground/30 focus:text-primary transition-colors"
+        className="bg-transparent text-right text-[13px] font-normal outline-none w-full min-w-0 text-white/90 placeholder:text-muted-foreground/30 focus:text-primary transition-colors"
       />
     </div>
   )
@@ -340,8 +340,8 @@ function DisplayField({
 }) {
   return (
     <div className="flex items-center justify-between py-1.5 gap-4">
-      <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className={`text-sm text-right ${alert ? 'text-destructive font-semibold' : highlight ? 'text-primary font-medium' : 'text-white/90'}`}>{value}</span>
+      <span className="text-[12px] font-normal text-white/40 shrink-0">{label}</span>
+      <span className={`text-[13px] text-right ${alert ? 'text-destructive font-semibold' : highlight ? 'text-primary font-medium' : 'text-white/90 font-normal'}`}>{value}</span>
     </div>
   )
 }

@@ -184,8 +184,11 @@
 
 /* Edge labels */
 .react-flow__edge-text {
-  fill: rgba(255, 255, 255, 0.35) !important;
+  fill: rgba(255, 255, 255, 0.4) !important;
   font-size: 11px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
 }
 .react-flow__edge-textbg {
   fill: rgba(0, 0, 0, 0.6) !important;

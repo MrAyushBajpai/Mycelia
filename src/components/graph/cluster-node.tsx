@@ -36,7 +36,7 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
         style={{ borderColor: color }}
       />
       <div 
-        className="text-xs font-bold uppercase tracking-[0.2em]" 
+        className="text-[12px] font-medium uppercase tracking-[0.15em]" 
         style={{ color }}
       >
         {d.label}
