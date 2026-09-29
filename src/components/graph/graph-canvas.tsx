@@ -1,10 +1,12 @@
 "use client"
 
+import { useState, useCallback } from "react"
 import {
   ReactFlow,
   Background,
   Controls,
   type NodeTypes,
+  type Connection,
   MarkerType,
   type DefaultEdgeOptions,
 } from "@xyflow/react"
@@ -13,6 +15,7 @@ import "@xyflow/react/dist/style.css"
 import { useGraphStore } from "@/stores/graph-store"
 import { PersonNode } from "./person-node"
 import { ClusterNode } from "./cluster-node"
+import { AddEdgeLabelDialog } from "@/components/dialogs/add-edge-label"
 
 const nodeTypes: NodeTypes = {
   person: PersonNode,
@@ -25,7 +28,12 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 }
 
 export function GraphCanvas() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, selectNode } = useGraphStore()
+  const { nodes, edges, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
+  const [pendingConnection, setPendingConnection] = useState<Connection | null>(null)
+
+  const handleConnect = useCallback((connection: Connection) => {
+    setPendingConnection(connection)
+  }, [])
 
   return (
     <div className="h-screen w-full">
@@ -34,7 +42,7 @@ export function GraphCanvas() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={handleConnect}
         onNodeClick={(_, node) => selectNode(node.id)}
         onPaneClick={() => selectNode(null)}
         nodeTypes={nodeTypes}
@@ -46,6 +54,12 @@ export function GraphCanvas() {
         <Background gap={20} size={1} />
         <Controls showInteractive={false} />
       </ReactFlow>
+
+      <AddEdgeLabelDialog
+        open={!!pendingConnection}
+        connection={pendingConnection}
+        onOpenChange={(open) => { if (!open) setPendingConnection(null) }}
+      />
     </div>
   )
 }
