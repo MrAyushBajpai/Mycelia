@@ -37,9 +37,11 @@ export function ContactDetail() {
   }
 
   function updateField(field: string, value: string) {
-    const updated = nodes.map((n) =>
-      n.id === node!.id ? { ...n, data: { ...n.data, [field]: value || null } } : n
-    )
+    const updated = nodes.map((n) => {
+      if (n.id !== node!.id) return n
+      const parsedValue = field === "cadenceDays" ? (value ? parseInt(value, 10) : null) : (value || null)
+      return { ...n, data: { ...n.data, [field]: parsedValue } }
+    })
     setNodes(updated)
   }
 
@@ -57,6 +59,7 @@ export function ContactDetail() {
           <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} />
           <EditableField label="Phone" value={data.phone as string} onChange={(v) => updateField("phone", v)} />
           <EditableField label="Birthday" value={data.birthday as string} onChange={(v) => updateField("birthday", v)} type="date" />
+          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" />
           <EditableField label="Notes" value={data.notes as string} onChange={(v) => updateField("notes", v)} />
         </Section>
 
