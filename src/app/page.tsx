@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { ReactFlowProvider } from "@xyflow/react"
 import { GraphCanvas } from "@/components/graph/graph-canvas"
 import { ContactDetail } from "@/components/panels/contact-detail"
 import { Toolbar } from "@/components/toolbar"
@@ -39,10 +40,12 @@ export default function Home() {
   if (!mounted) return null
 
   return (
-    <main className="relative flex-1">
-      <Toolbar />
-      <GraphCanvas />
-      <ContactDetail />
-    </main>
+    <ReactFlowProvider>
+      <main className="relative flex-1">
+        <Toolbar />
+        <GraphCanvas />
+        <ContactDetail />
+      </main>
+    </ReactFlowProvider>
   )
 }
