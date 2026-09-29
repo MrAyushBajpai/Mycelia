@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, useState, useRef, useMemo } from "react"
-import { Handle, Position, type NodeProps } from "@xyflow/react"
+import { Handle, Position, NodeToolbar, type NodeProps } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 import { useTimeStore } from "@/stores/time-store"
 import { useGraphStore } from "@/stores/graph-store"
@@ -109,8 +109,8 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
         <Handle type="source" position={Position.Right} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
       </div>
 
-      {showTooltip && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 p-3.5 bg-[#0a0a0c]/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.8)] w-48 z-50 animate-in fade-in slide-in-from-top-2 zoom-in-95 duration-200 pointer-events-none">
+      <NodeToolbar isVisible={showTooltip} position={Position.Bottom} offset={12}>
+        <div className="p-3.5 bg-[#0a0a0c]/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.8)] w-48 animate-in fade-in zoom-in-95 duration-200 pointer-events-none">
           <div className="flex flex-col gap-2.5">
             <div className="border-b border-white/5 pb-2">
                <span className="text-[15px] font-semibold text-white/90">{d.label}</span>
@@ -129,7 +129,7 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
             </div>
           </div>
         </div>
-      )}
+      </NodeToolbar>
     </div>
   )
 })
