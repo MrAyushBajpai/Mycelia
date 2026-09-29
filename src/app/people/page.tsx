@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { ReactFlowProvider } from "@xyflow/react"
 import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
@@ -8,15 +8,18 @@ import { Sidebar } from "@/components/sidebar"
 import { ContactDetail } from "@/components/panels/contact-detail"
 import { SEED_NODES, SEED_EDGES } from "@/lib/seed-data"
 import { Button } from "@/components/ui/button"
-import { Plus, MoreHorizontal, Filter, ArrowUpDown } from "lucide-react"
+import { Plus, MoreHorizontal, ArrowUpDown, Clock, AlertCircle, Type } from "lucide-react"
 import { AddPersonDialog } from "@/components/dialogs/add-person"
 import { formatDistanceToNow, isPast, differenceInDays } from "date-fns"
+
+type SortOption = 'urgency' | 'recent' | 'alpha'
 
 export default function PeoplePage() {
   const { nodes, edges, setNodes, setEdges, selectNode, selectedNodeId } = useGraphStore()
   const [mounted, setMounted] = useState(false)
   const [addPersonOpen, setAddPersonOpen] = useState(false)
-  const [filter, setFilter] = useState<string | null>(null)
+  const [filter, setFilter] = useState<string>("all")
+  const [sortBy, setSortBy] = useState<SortOption>("urgency")
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -26,14 +29,51 @@ export default function PeoplePage() {
     setMounted(true)
   }, [nodes.length, setNodes, setEdges])
 
+  const people = useMemo(() => nodes.filter(n => n.type === "person"), [nodes])
+  const circles = useMemo(() => nodes.filter(n => n.type === "cluster"), [nodes])
+
+  // Performance: Precompute sort/filter values once per render cycle
+  const computedPeople = useMemo(() => {
+    const now = Date.now()
+    return people.map(p => {
+      const data = p.data as any
+      const lastContact = data.lastContacted ? new Date(data.lastContacted).getTime() : 0
+      const nextDate = (lastContact && data.cadenceDays) 
+        ? lastContact + (data.cadenceDays * 86400000) 
+        : Infinity
+      const isOverdue = nextDate !== Infinity && nextDate < now
+      
+      return { 
+        ...p, 
+        lastContact, 
+        nextDate, 
+        isOverdue, 
+        label: String(data.label || "") 
+      }
+    })
+  }, [people])
+
+  const sortedAndFiltered = useMemo(() => {
+    // 1. Filter
+    let result = computedPeople
+    if (filter === "overdue") {
+      result = result.filter(p => p.isOverdue)
+    } else if (filter !== "all") {
+      result = result.filter(p => edges.some(e => e.source === p.id && e.target === filter))
+    }
+
+    // 2. Sort
+    return [...result].sort((a, b) => {
+      if (sortBy === "alpha") return a.label.localeCompare(b.label)
+      if (sortBy === "recent") return b.lastContact - a.lastContact
+      if (sortBy === "urgency") return a.nextDate - b.nextDate
+      return 0
+    })
+  }, [computedPeople, edges, filter, sortBy])
+
+  const overdueCount = computedPeople.filter(p => p.isOverdue).length
+
   if (!mounted) return null
-
-  const people = nodes.filter(n => n.type === "person")
-  const circles = nodes.filter(n => n.type === "cluster")
-
-  const filteredPeople = filter 
-    ? people.filter(p => edges.some(e => e.source === p.id && e.target === filter))
-    : people
 
   return (
     <ReactFlowProvider>
@@ -58,15 +98,25 @@ export default function PeoplePage() {
             </Button>
           </div>
 
-          {/* Filters */}
+          {/* Filters & Sort */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div className="flex flex-wrap gap-2">
               <button 
-                onClick={() => setFilter(null)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${!filter ? "bg-[#0d9488]/20 text-[#2dd4bf] border border-[#0d9488]/30" : "bg-white/5 text-white/50 border border-white/5 hover:bg-white/10"}`}
+                onClick={() => setFilter("all")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${filter === "all" ? "bg-[#0d9488]/20 text-[#2dd4bf] border border-[#0d9488]/30" : "bg-white/5 text-white/50 border border-white/5 hover:bg-white/10"}`}
               >
                 All ({people.length})
               </button>
+              
+              <button 
+                onClick={() => setFilter("overdue")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${filter === "overdue" ? "bg-[#ea580c]/20 text-[#ea580c] border border-[#ea580c]/30" : "bg-white/5 text-white/50 border border-white/5 hover:bg-white/10"}`}
+              >
+                Needs Action {overdueCount > 0 && <span className="bg-[#ea580c] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{overdueCount}</span>}
+              </button>
+
+              <div className="w-px h-6 bg-white/10 mx-1 self-center" />
+
               {circles.map(c => {
                 const count = edges.filter(e => e.target === c.id).length
                 const isActive = filter === c.id
@@ -82,18 +132,40 @@ export default function PeoplePage() {
               })}
             </div>
             
-            <div className="flex items-center gap-2">
-              <Button variant="outline" className="bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white rounded-lg h-9 gap-2">
-                <Filter size={14} /> Filter
+            <div className="flex items-center relative group">
+              <Button variant="outline" className="bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white rounded-lg h-9 gap-2 w-40 justify-start">
+                <ArrowUpDown size={14} /> 
+                {sortBy === "urgency" && "Sort: Urgency"}
+                {sortBy === "recent" && "Sort: Recent"}
+                {sortBy === "alpha" && "Sort: A-Z"}
               </Button>
-              <Button variant="outline" className="bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white rounded-lg h-9 gap-2">
-                <ArrowUpDown size={14} /> Sort
-              </Button>
+              
+              {/* Sort Dropdown */}
+              <div className="absolute right-0 top-10 w-40 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 py-1">
+                <div 
+                  className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "urgency" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                  onClick={() => setSortBy("urgency")}
+                >
+                  <AlertCircle size={14} /> By Urgency
+                </div>
+                <div 
+                  className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "recent" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                  onClick={() => setSortBy("recent")}
+                >
+                  <Clock size={14} /> Most Recent
+                </div>
+                <div 
+                  className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "alpha" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                  onClick={() => setSortBy("alpha")}
+                >
+                  <Type size={14} /> Alphabetical
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Table */}
-          <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+          <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl pb-4">
             <div className="grid grid-cols-[auto_1.5fr_1fr_1fr_1fr_1fr_auto] gap-4 p-4 border-b border-white/5 text-xs font-semibold tracking-wider text-white/40 uppercase items-center">
               <div className="w-5"></div>
               <div>Name</div>
@@ -105,7 +177,7 @@ export default function PeoplePage() {
             </div>
 
             <div className="flex flex-col">
-              {filteredPeople.map(person => {
+              {sortedAndFiltered.map(person => {
                 const isSelected = selectedNodeId === person.id
                 
                 // Edges where person is source and target is another person
@@ -114,18 +186,14 @@ export default function PeoplePage() {
                 const circleConnections = edges.filter(e => e.source === person.id && nodes.find(n => n.id === e.target)?.type === "cluster")
 
                 const data = person.data as any
-                const lastContact = data.lastContacted ? new Date(data.lastContacted) : null
-                const lastContactStr = lastContact ? formatDistanceToNow(lastContact, { addSuffix: true }) : "Never"
+                const lastContactStr = person.lastContact > 0 ? formatDistanceToNow(person.lastContact, { addSuffix: true }) : "Never"
                 
                 let nextFollowUpStr = "-"
-                let isOverdue = false
-                if (lastContact && data.cadenceDays) {
-                  const nextDate = new Date(lastContact.getTime() + data.cadenceDays * 86400000)
-                  if (isPast(nextDate)) {
-                    isOverdue = true
-                    nextFollowUpStr = `Overdue by ${differenceInDays(new Date(), nextDate)} days`
+                if (person.lastContact > 0 && data.cadenceDays) {
+                  if (person.isOverdue) {
+                    nextFollowUpStr = `Overdue by ${differenceInDays(new Date(), person.nextDate)} days`
                   } else {
-                    nextFollowUpStr = `In ${formatDistanceToNow(nextDate)}`
+                    nextFollowUpStr = `In ${formatDistanceToNow(person.nextDate)}`
                   }
                 }
 
@@ -167,7 +235,7 @@ export default function PeoplePage() {
                       {lastContactStr}
                     </div>
 
-                    <div className={`font-medium truncate ${isOverdue ? "text-[#ea580c]" : "text-white/60"}`}>
+                    <div className={`font-medium truncate ${person.isOverdue ? "text-[#ea580c]" : "text-white/60"}`}>
                       {nextFollowUpStr}
                     </div>
 
@@ -214,9 +282,9 @@ export default function PeoplePage() {
                 )
               })}
               
-              {filteredPeople.length === 0 && (
+              {sortedAndFiltered.length === 0 && (
                 <div className="p-12 text-center text-white/40">
-                  No people found in this group.
+                  No people found in this view.
                 </div>
               )}
             </div>
