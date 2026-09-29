@@ -9,6 +9,7 @@ import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
 import { SEED_NODES, SEED_EDGES } from "@/lib/seed-data"
+import { CircleDetail } from "@/components/panels/circle-detail"
 
 export default function Home() {
   const { setNodes, setEdges } = useGraphStore()
@@ -30,6 +31,7 @@ export default function Home() {
         <CommandBar />
         <GraphCanvas />
         <ContactDetail />
+        <CircleDetail />
       </main>
     </ReactFlowProvider>
   )
