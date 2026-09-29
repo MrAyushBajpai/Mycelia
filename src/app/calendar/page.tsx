@@ -39,11 +39,17 @@ export default function CalendarPage() {
             const date = new Date(dateStr as string)
             date.setFullYear(new Date().getFullYear())
             
+            const lowerTitle = title.toLowerCase()
+            let eventColor = clusterColor // fallback to circle color for unknown events
+            if (lowerTitle.includes("birthday")) eventColor = "#8b5cf6"
+            else if (lowerTitle.includes("anniversary")) eventColor = "#ef4444"
+            else if (lowerTitle.includes("sync") || lowerTitle.includes("call")) eventColor = "#f97316"
+            
             evts.push({
               id: `${node.id}-${title}`,
               date,
               title: `${data.label}'s ${title.toLowerCase()}`,
-              color: title.toLowerCase() === "birthday" ? "#8b5cf6" : "#ef4444",
+              color: eventColor,
               type: title,
               people: [node],
               time: null
