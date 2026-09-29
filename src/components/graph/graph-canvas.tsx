@@ -8,6 +8,7 @@ import {
   type Connection,
   MarkerType,
   type DefaultEdgeOptions,
+  useReactFlow
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 
@@ -66,16 +67,34 @@ function DynamicBackground() {
 }
 
 export function GraphCanvas() {
-  const { nodes, edges, selectedNodeId, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
+  const { nodes, edges, selectedNodeId, onNodesChange, onEdgesChange, selectNode, autoLayout } = useGraphStore()
   const syncGraph = useNotificationStore((s) => s.syncGraph)
   const now = useTimeStore((s) => s.now)
+  const { fitView } = useReactFlow()
 
   const [pendingConnection, setPendingConnection] = useState<Connection | null>(null)
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
+  const [hasLaidOut, setHasLaidOut] = useState(false)
 
   useEffect(() => {
     syncGraph(nodes, now)
   }, [nodes, now, syncGraph])
+  
+  useEffect(() => {
+    if (nodes.length > 0 && nodes.every(n => n.measured?.width)) {
+      const needsLayout = nodes.some(n => n.position.x === 0 && n.position.y === 0 && !n.data?.manuallyPositioned)
+      if (needsLayout) {
+        if (!hasLaidOut) {
+          setHasLaidOut(true)
+          autoLayout()
+          setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 50)
+        } else {
+          // If already laid out but a new node appeared, just do a gentle local layout
+          autoLayout({ localMode: true })
+        }
+      }
+    }
+  }, [nodes, hasLaidOut, autoLayout, fitView])
 
   const handleConnect = useCallback((connection: Connection) => {
     setPendingConnection(connection)

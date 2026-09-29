@@ -21,6 +21,7 @@ type GraphState = {
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
   deleteNode: (id: string) => void
+  autoLayout: (options?: { resetPins?: boolean; localMode?: boolean }) => void
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -29,10 +30,23 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   selectedNodeId: null,
 
   onNodesChange: (changes) => {
-    const nextNodes = applyNodeChanges(changes, get().nodes)
-    const currentSelectedId = get().selectedNodeId
+    let nextNodes = applyNodeChanges(changes, get().nodes)
     
-    // If we have a selection, but React Flow natively deselected it (e.g. via Esc)
+    // Mark nodes as manually positioned if the user drags them
+    const draggedNodeIds = new Set(
+      changes
+        .filter((c): c is import("@xyflow/react").NodePositionChange => c.type === 'position' && !!c.dragging)
+        .map(c => c.id)
+    )
+    if (draggedNodeIds.size > 0) {
+      nextNodes = nextNodes.map(n => 
+        draggedNodeIds.has(n.id) 
+          ? { ...n, data: { ...n.data, manuallyPositioned: true } }
+          : n
+      )
+    }
+    
+    const currentSelectedId = get().selectedNodeId
     if (currentSelectedId) {
       const activeNode = nextNodes.find(n => n.id === currentSelectedId)
       if (activeNode && activeNode.selected === false) {
@@ -67,4 +81,27 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       selectedNodeId: selectedNodeId === id ? null : selectedNodeId,
     })
   },
+
+  autoLayout: async (options) => {
+    const { computeLayout } = await import('@/lib/layout')
+    const { nodes, edges } = get()
+    const layoutedPositions = computeLayout(nodes, edges, options)
+    
+    set({
+      nodes: nodes.map(n => {
+        const pos = layoutedPositions.get(n.id)
+        if (pos) {
+          return {
+            ...n,
+            position: { x: pos.x, y: pos.y },
+            data: {
+              ...n.data,
+              manuallyPositioned: options?.resetPins ? false : n.data.manuallyPositioned
+            }
+          }
+        }
+        return n
+      })
+    })
+  }
 }))
