@@ -67,13 +67,13 @@ export function CommandBar() {
       
       if (matchedId) {
         matchedNodes.add(matchedId)
-        return <span key={i} className="text-primary font-medium bg-primary/10 rounded px-1">{word} </span>
+        return <span key={i} className="text-primary">{word} </span>
       }
     }
     
     // Highlight date phrase
     if (dateStringMatch && dateStringMatch.toLowerCase().includes(word.toLowerCase())) {
-       return <span key={i} className="text-amber-500 font-medium">{word} </span>
+       return <span key={i} className="text-amber-500">{word} </span>
     }
 
     return <span key={i}>{word} </span>
