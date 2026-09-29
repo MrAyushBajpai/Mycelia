@@ -76,88 +76,30 @@ export function CircleDetail() {
 
         <div className="p-6 flex flex-col gap-8">
           {activeTab === "overview" && (
-            <>
-              {/* Details */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white/90">Details</h3>
-                  <button className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60 text-[11px] transition-colors border border-white/5">
-                    <Edit2 size={10} /> Edit
-                  </button>
+            <div className="animate-in fade-in duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-white/90">Details</h3>
+                <button className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60 text-[11px] transition-colors border border-white/5">
+                  <Edit2 size={10} /> Edit
+                </button>
+              </div>
+              <div className="flex flex-col gap-3 text-sm">
+                <div className="grid grid-cols-[100px_1fr] items-start">
+                  <span className="text-white/40">Name</span>
+                  <span className="text-white/80">{String(data.label)}</span>
                 </div>
-                <div className="flex flex-col gap-3 text-sm">
-                  <div className="grid grid-cols-[100px_1fr] items-start">
-                    <span className="text-white/40">Name</span>
-                    <span className="text-white/80">{String(data.label)}</span>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr] items-start">
-                    <span className="text-white/40">Members</span>
-                    <span className="text-white/80">{members.length} people</span>
-                  </div>
-                  <div className="grid grid-cols-[100px_1fr] items-start">
-                    <span className="text-white/40">Description</span>
-                    <span className="text-white/80 bg-white/[0.02] border border-white/[0.02] p-2.5 rounded-lg leading-relaxed text-[13px]">
-                      {data.description || "No description provided."}
-                    </span>
-                  </div>
+                <div className="grid grid-cols-[100px_1fr] items-start">
+                  <span className="text-white/40">Members</span>
+                  <span className="text-white/80">{members.length} people</span>
+                </div>
+                <div className="grid grid-cols-[100px_1fr] items-start">
+                  <span className="text-white/40">Description</span>
+                  <span className="text-white/80 bg-white/[0.02] border border-white/[0.02] p-2.5 rounded-lg leading-relaxed text-[13px]">
+                    {data.description || "No description provided."}
+                  </span>
                 </div>
               </div>
-
-              {/* Members Preview */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white/90">Members ({members.length})</h3>
-                  <button className="flex items-center gap-1.5 px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-white/60 text-[11px] transition-colors border border-white/5">
-                    <Plus size={10} /> Add
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2 cursor-pointer" onClick={() => setActiveTab("members")}>
-                  {members.slice(0, 5).map(m => (
-                    <div key={m.id} className="w-8 h-8 rounded-full bg-[#1c1c1e] border border-white/5 flex items-center justify-center text-white/80 font-medium text-xs shadow-sm hover:ring-2 hover:ring-white/20 transition-all" title={String(m.data.label)}>
-                      {String(m.data.label).charAt(0).toUpperCase()}
-                    </div>
-                  ))}
-                  {members.length > 5 && (
-                    <div className="w-8 h-8 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-white/50 font-medium text-[11px] hover:bg-white/10 transition-colors">
-                      +{members.length - 5}
-                    </div>
-                  )}
-                  {members.length === 0 && <span className="text-white/40 text-sm">No members yet.</span>}
-                </div>
-              </div>
-
-              {/* Activity Preview */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white/90">Recent Activity</h3>
-                  {allActivities.length > 3 && (
-                    <button onClick={() => setActiveTab("activity")} className="text-xs text-white/40 hover:text-white/70 transition-colors">
-                      View all
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-col gap-4">
-                  {allActivities.length > 0 ? allActivities.slice(0, 3).map((act, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#1c1c1e] border border-white/5 flex items-center justify-center flex-shrink-0 text-white/80 font-medium text-xs shadow-sm mt-0.5">
-                        {String(act.person.data.label).charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline justify-between gap-2 mb-1">
-                          <span className="text-sm font-medium text-white/90 truncate">{String(act.person.data.label)}</span>
-                          <span className="text-[11px] text-white/30 whitespace-nowrap flex-shrink-0">
-                            {formatDistanceToNow(act.date)} ago
-                          </span>
-                        </div>
-                        <div className="text-[13px] text-white/60 line-clamp-2 leading-snug">{act.action}</div>
-                      </div>
-                    </div>
-                  )) : (
-                    <div className="text-white/40 text-sm">No recent activity.</div>
-                  )}
-                </div>
-              </div>
-            </>
+            </div>
           )}
 
           {activeTab === "members" && (
