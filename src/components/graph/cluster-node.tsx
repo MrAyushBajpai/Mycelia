@@ -32,7 +32,7 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
       <Handle 
         type="target" 
         position={Position.Left} 
-        className="!bg-[#09090b] !border-[1.5px] !w-2.5 !h-2.5 transition-colors hover:!bg-white/30"
+        className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30"
         style={{ borderColor: color }}
       />
       <div 

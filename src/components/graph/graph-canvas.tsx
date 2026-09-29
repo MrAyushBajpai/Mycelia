@@ -90,6 +90,7 @@ export function GraphCanvas() {
 
       return {
         ...e,
+        label: isFaded ? undefined : e.label,
         animated: isConnected ? true : false,
         style: {
           ...e.style,
@@ -169,7 +170,7 @@ export function GraphCanvas() {
           fitView
           proOptions={{ hideAttribution: true }}
         >
-          <Controls showInteractive={false} className="!bg-transparent" />
+          <Controls showInteractive={false} className="!bg-transparent !mb-12" />
         </ReactFlow>
       </div>
 

@@ -109,7 +109,7 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
         {isDueSoon && !isOverdue && !isEvent && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
-        <Handle type="target" position={Position.Left} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
+        <Handle type="target" position={Position.Left} className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase relative overflow-hidden">
             {/* Tiny circular progress indicator behind the initial */}
@@ -123,7 +123,7 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
           </div>
           <span className="text-[15px] font-semibold tracking-tight">{d.label}</span>
         </div>
-        <Handle type="source" position={Position.Right} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Right} className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
       </div>
 
       <NodeToolbar isVisible={showTooltip} position={Position.Bottom} offset={12}>
