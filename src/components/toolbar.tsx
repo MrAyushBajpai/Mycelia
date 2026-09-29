@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, User, Users, UploadCloud } from "lucide-react"
+import { Search, User, Users, UploadCloud, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AddPersonDialog } from "@/components/dialogs/add-person"
 import { AddClusterDialog } from "@/components/dialogs/add-cluster"
@@ -56,7 +56,12 @@ export function Toolbar() {
         <Button variant="ghost" size="icon-sm" className="rounded-full w-8 h-8 hover:bg-white/10 text-white/70 hover:text-white flex items-center justify-center" onClick={() => setImportOpen(true)} title="Import CSV">
           <UploadCloud size={14} />
         </Button>
-
+        <div className="w-px h-5 bg-white/[0.06]" />
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/70 hover:text-white gap-1.5" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))} title="Log interaction (⌘K)">
+          <MessageSquare size={14} />
+          <span className="text-white/90">Log</span>
+          <kbd className="text-[10px] text-white/25 bg-white/[0.04] border border-white/[0.06] rounded px-1 py-0.5 font-mono ml-1">⌘K</kbd>
+        </Button>
         <div className="w-px h-5 bg-white/[0.06]" />
         <div className="relative">
           <div className="flex items-center gap-1.5 px-3 h-8 rounded-full hover:bg-white/5 transition-colors">
