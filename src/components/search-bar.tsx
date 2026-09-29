@@ -135,14 +135,14 @@ export function SearchBar() {
       }}
     >
       <div 
-        className={`flex items-center h-10 bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)] rounded-full transition-all duration-300 ease-out overflow-hidden cursor-text ${isActuallyExpanded ? "w-80 px-1" : "w-10 px-0 justify-center"}`}
+        className={`flex items-center h-10 bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] hover:bg-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] rounded-full transition-all duration-300 ease-out overflow-hidden cursor-text ${isActuallyExpanded ? "w-80 px-1" : "w-10 px-0 justify-center"}`}
         onClick={() => {
           setIsExpanded(true)
           searchInputRef.current?.focus()
         }}
       >
-        <div className={`flex items-center justify-center text-white/50 transition-all duration-300 flex-shrink-0 ${isActuallyExpanded ? "w-8 ml-2" : "w-10"}`}>
-          <Search size={14} />
+        <div className={`flex items-center justify-center transition-all duration-300 flex-shrink-0 ${isActuallyExpanded ? "w-8 ml-2 text-white/50" : "w-10 text-white/80"}`}>
+          <Search size={isActuallyExpanded ? 14 : 16} strokeWidth={isActuallyExpanded ? 2 : 2.5} />
         </div>
         
         <input
