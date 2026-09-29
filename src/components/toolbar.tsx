@@ -61,6 +61,7 @@ export function Toolbar() {
         } else if (e.key.toLowerCase() === "l") {
           e.preventDefault()
           useGraphStore.getState().autoLayout()
+          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
         } else if (e.key.toLowerCase() === "i") {
           e.preventDefault()
           setImportOpen(true)
@@ -157,13 +158,19 @@ export function Toolbar() {
           <kbd className="text-[10px] text-white/25 bg-white/[0.04] border border-white/[0.06] rounded px-1.5 py-0.5 font-mono hidden sm:block">C</kbd>
         </Button>
         <div className="w-px h-5 bg-white/[0.06]" />
-        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => useGraphStore.getState().autoLayout()} title="Tidy Graph (L)">
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => {
+          useGraphStore.getState().autoLayout()
+          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+        }} title="Tidy Graph (L)">
           <Wand2 size={14} />
           <span>Tidy</span>
           <kbd className="text-[10px] text-white/25 bg-white/[0.04] border border-white/[0.06] rounded px-1.5 py-0.5 font-mono hidden sm:block">L</kbd>
         </Button>
         <div className="w-px h-5 bg-white/[0.06]" />
-        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => useGraphStore.getState().autoLayout({ resetPins: true })} title="Reset Layout">
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => {
+          useGraphStore.getState().autoLayout({ resetPins: true })
+          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+        }} title="Reset Layout">
           <RotateCcw size={14} />
           <span>Reset</span>
         </Button>

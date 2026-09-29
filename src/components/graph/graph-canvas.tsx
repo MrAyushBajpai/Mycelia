@@ -18,21 +18,22 @@ import { useTimeStore } from "@/stores/time-store"
 import { PersonNode } from "./person-node"
 import { ClusterNode } from "./cluster-node"
 import { AddEdgeLabelDialog } from "@/components/dialogs/add-edge-label"
+import { OrganicEdge } from "./organic-edge"
 
 const nodeTypes: NodeTypes = {
   person: PersonNode,
   cluster: ClusterNode,
 }
 
+const edgeTypes = {
+  default: OrganicEdge,
+}
+
 // Increased contrast for edges so they are visible
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "default",
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.4)" },
-  style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.25)" },
-  labelStyle: { fill: "rgba(255, 255, 255, 0.6)", fontSize: 10, fontWeight: 500, letterSpacing: "0.05em" },
-  labelBgStyle: { fill: "#09090b", fillOpacity: 0.9 },
-  labelBgPadding: [6, 4],
-  labelBgBorderRadius: 4,
+  style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.25)", zIndex: 0 },
   animated: true,
 }
 
@@ -87,7 +88,7 @@ export function GraphCanvas() {
         if (!hasLaidOut) {
           setHasLaidOut(true)
           autoLayout()
-          setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 50)
+          setTimeout(() => fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
         } else {
           // If already laid out but a new node appeared, just do a gentle local layout
           autoLayout({ localMode: true })
@@ -184,6 +185,7 @@ export function GraphCanvas() {
           onNodeMouseLeave={() => setHoveredNodeId(null)}
           onPaneClick={() => selectNode(null)}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           deleteKeyCode={["Backspace", "Delete"]}
           fitView

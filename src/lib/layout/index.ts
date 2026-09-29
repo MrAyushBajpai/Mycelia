@@ -19,9 +19,11 @@ export const LAYOUT_CONFIG = {
   clusterPullStrength: 0.08,
   circleRepulsion: -800,
   circleRepulsionDistance: 600,
+  dirMinDx: 220,
+  dirStrength: 0.3,
   iterationsMain: 300,
   iterationsLocal: 60,
-  componentGap: 120,
+  componentGap: 90,
   randomSeed: 42,
   defaultPersonWidth: 120,
   defaultPersonHeight: 46,
@@ -47,6 +49,8 @@ type SimNode = {
   id: string
   x: number
   y: number
+  vx?: number
+  vy?: number
   fx?: number | null
   fy?: number | null
   width: number
@@ -56,8 +60,8 @@ type SimNode = {
 }
 
 type SimLink = {
-  source: string | SimNode
-  target: string | SimNode
+  source: SimNode | string
+  target: SimNode | string
 }
 
 function getDimensions(n: Node) {
@@ -67,8 +71,11 @@ function getDimensions(n: Node) {
   return { width, height }
 }
 
-export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptions = {}): Map<string, { x: number, y: number }> {
-  // 1. Map to adjacency list to find connected components
+export function computeLayout(originalNodes: Node[], originalEdges: Edge[], options: LayoutOptions = {}): Map<string, { x: number, y: number }> {
+  // Determinism: Sort inputs by ID
+  const nodes = [...originalNodes].sort((a, b) => a.id.localeCompare(b.id))
+  const edges = [...originalEdges].sort((a, b) => a.id.localeCompare(b.id))
+
   const adj = new Map<string, Set<string>>()
   nodes.forEach(n => adj.set(n.id, new Set()))
   edges.forEach(e => {
@@ -97,61 +104,52 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
           }
         })
       }
+      comp.sort((a, b) => a.localeCompare(b))
       components.push(comp)
     }
   })
 
-  // Sort components by size descending, so largest is in the center
-  components.sort((a, b) => b.length - a.length)
+  // Tie-break component sorting by first node ID
+  components.sort((a, b) => b.length - a.length || a[0].localeCompare(b[0]))
 
   const rng = randomLcg(LAYOUT_CONFIG.randomSeed)
   const finalPositions = new Map<string, { x: number, y: number }>()
-
-  let nextComponentOffsetX = 0
-  
   const allCircleIds = new Set(nodes.filter(n => n.type === "cluster").map(n => n.id))
 
-  for (const comp of components) {
-    if (comp.length === 1 && !options.localMode) {
-      // Handle singletons in a grid later, or just lay them out simply
-      // We will just let them process but maybe offset them neatly
-    }
+  const compBoxes: { id: string; minX: number; maxX: number; minY: number; maxY: number; nodes: SimNode[] }[] = []
 
+  for (const comp of components) {
     const compNodes = nodes.filter(n => comp.includes(n.id))
     
-    // Convert to SimNodes
     const simNodes: SimNode[] = compNodes.map(n => {
       const { width, height } = getDimensions(n)
       
-      // Determine if pinned (user manually moved it, meaning position was saved manually)
-      // For now, if resetPins is true, unpin all. Otherwise, if n.data.manuallyPositioned, pin it.
-      // We'll also treat any node that lacks manuallyPositioned as unpinned, BUT we give it a warm start if it has a position.
       const isPinned = !options.resetPins && !!n.data?.manuallyPositioned
       
       let x = n.position.x + width / 2
       let y = n.position.y + height / 2
 
-      // If it's a new node (0,0), give it a warm start near neighbors, or a deterministic start
-      if (n.position.x === 0 && n.position.y === 0 && !isPinned) {
+      // If resetPins, ignore current positions completely and use seeded start
+      if (options.resetPins || (n.position.x === 0 && n.position.y === 0 && !isPinned)) {
         let cx = 0, cy = 0, count = 0
-        const neighbors = adj.get(n.id) || new Set()
-        neighbors.forEach(neighborId => {
-          const neighbor = nodes.find(x => x.id === neighborId)
-          if (neighbor && (neighbor.position.x !== 0 || neighbor.position.y !== 0)) {
-            const dim = getDimensions(neighbor)
-            cx += neighbor.position.x + dim.width / 2
-            cy += neighbor.position.y + dim.height / 2
-            count++
-          }
-        })
+        if (!options.resetPins) {
+          const neighbors = adj.get(n.id) || new Set()
+          neighbors.forEach(neighborId => {
+            const neighbor = nodes.find(x => x.id === neighborId)
+            if (neighbor && (neighbor.position.x !== 0 || neighbor.position.y !== 0)) {
+              const dim = getDimensions(neighbor)
+              cx += neighbor.position.x + dim.width / 2
+              cy += neighbor.position.y + dim.height / 2
+              count++
+            }
+          })
+        }
         
-        if (count > 0) {
-          // Warm start near neighbors with slight deterministic offset
+        if (count > 0 && !options.resetPins) {
           const offset = (hashString(n.id) % 100) - 50
           x = (cx / count) + offset
           y = (cy / count) + offset
         } else {
-          // Deterministic ring layout for completely disconnected new nodes
           const angle = (hashString(n.id) % 360) * (Math.PI / 180)
           x = Math.cos(angle) * 200
           y = Math.sin(angle) * 200
@@ -165,6 +163,8 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
         height,
         x,
         y,
+        vx: 0,
+        vy: 0,
         fx: isPinned ? x : null,
         fy: isPinned ? y : null,
         isPinned
@@ -173,11 +173,8 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
 
     const compEdges = edges.filter(e => comp.includes(e.source) && comp.includes(e.target))
     const simLinks: SimLink[] = compEdges.map(e => ({ source: e.source, target: e.target }))
-
     const simNodesMap = new Map(simNodes.map(n => [n.id, n]))
 
-    // Custom Forces
-    // 1. Cluster pull: people pulled to the average of their circles
     const clusterPullForce = (alpha: number) => {
       for (const n of simNodes) {
         if (n.type === "person" && !n.isPinned) {
@@ -186,39 +183,45 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
           neighbors.forEach(neighborId => {
             if (allCircleIds.has(neighborId)) {
               const cn = simNodesMap.get(neighborId)
-              if (cn) {
-                cx += cn.x
-                cy += cn.y
-                count++
-              }
+              if (cn) { cx += cn.x; cy += cn.y; count++ }
             }
           })
           if (count > 0) {
-            cx /= count
-            cy /= count
-            n.x += (cx - n.x) * LAYOUT_CONFIG.clusterPullStrength * alpha
-            n.y += (cy - n.y) * LAYOUT_CONFIG.clusterPullStrength * alpha
+            cx /= count; cy /= count
+            n.vx! += (cx - n.x) * LAYOUT_CONFIG.clusterPullStrength * alpha
+            n.vy! += (cy - n.y) * LAYOUT_CONFIG.clusterPullStrength * alpha
           }
         }
       }
     }
 
-    // 2. Extra circle repulsion
     const circleRepulsionForce = (alpha: number) => {
       const circles = simNodes.filter(n => n.type === "cluster")
       for (let i = 0; i < circles.length; i++) {
         for (let j = i + 1; j < circles.length; j++) {
-          const a = circles[i]
-          const b = circles[j]
-          const dx = a.x - b.x
-          const dy = a.y - b.y
+          const a = circles[i], b = circles[j]
+          const dx = a.x - b.x, dy = a.y - b.y
           const dist = Math.sqrt(dx * dx + dy * dy) || 1
           if (dist < LAYOUT_CONFIG.circleRepulsionDistance) {
             const force = (LAYOUT_CONFIG.circleRepulsionDistance - dist) / dist * alpha * (LAYOUT_CONFIG.circleRepulsion / -1000)
-            const fX = dx * force
-            const fY = dy * force
-            if (!a.isPinned) { a.x += fX; a.y += fY }
-            if (!b.isPinned) { b.x -= fX; b.y -= fY }
+            const fX = dx * force, fY = dy * force
+            if (!a.isPinned) { a.vx! += fX; a.vy! += fY }
+            if (!b.isPinned) { b.vx! -= fX; b.vy! -= fY }
+          }
+        }
+      }
+    }
+
+    const directionForce = (alpha: number) => {
+      for (const link of simLinks) {
+        const s = typeof link.source === 'string' ? simNodesMap.get(link.source) : link.source
+        const t = typeof link.target === 'string' ? simNodesMap.get(link.target) : link.target
+        if (s && t) {
+          const dx = t.x - s.x
+          if (dx < LAYOUT_CONFIG.dirMinDx) {
+            const force = (LAYOUT_CONFIG.dirMinDx - dx) * alpha * LAYOUT_CONFIG.dirStrength
+            if (!s.isPinned) s.vx! -= force
+            if (!t.isPinned) t.vx! += force
           }
         }
       }
@@ -233,12 +236,18 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
       .force("y", forceY(0).strength(LAYOUT_CONFIG.gravityStrength))
       .force("clusterPull", clusterPullForce)
       .force("circleRepulsion", circleRepulsionForce)
+      .force("direction", directionForce)
       .stop()
+
+    // Tidy uses lower alpha to refine without destroying layout, Reset uses full alpha
+    const isFirstLoad = !options.resetPins && !options.localMode && nodes.some(n => n.position.x === 0 && n.position.y === 0 && !n.data?.manuallyPositioned)
+    const startAlpha = options.resetPins || isFirstLoad ? 1 : 0.3
+    
+    sim.alpha(startAlpha)
 
     const iterations = options.localMode ? LAYOUT_CONFIG.iterationsLocal : LAYOUT_CONFIG.iterationsMain
     sim.tick(iterations)
 
-    // Compute bounding box of this component to pack it
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
     simNodes.forEach(n => {
       minX = Math.min(minX, n.x - n.width / 2)
@@ -247,25 +256,49 @@ export function computeLayout(nodes: Node[], edges: Edge[], options: LayoutOptio
       maxY = Math.max(maxY, n.y + n.height / 2)
     })
     
-    // Fallback if empty
     if (minX === Infinity) { minX = 0; maxX = 0; minY = 0; maxY = 0 }
+    compBoxes.push({ id: comp[0], minX, maxX, minY, maxY, nodes: simNodes })
+  }
 
-    const compWidth = maxX - minX
-
-    // If localMode is on, we don't offset components, we just leave them where they landed
-    // (since localMode implies we are just gently settling a new node into the existing space)
-    const offsetX = options.localMode ? 0 : nextComponentOffsetX - minX
-
-    simNodes.forEach(n => {
-      // Convert center back to top-left
-      const finalX = (n.x + offsetX) - n.width / 2
-      const finalY = n.y - n.height / 2
-      finalPositions.set(n.id, { x: finalX, y: finalY })
+  // 16:9 Packing
+  if (options.localMode) {
+    compBoxes.forEach(box => {
+      box.nodes.forEach(n => {
+        finalPositions.set(n.id, { x: n.x - n.width / 2, y: n.y - n.height / 2 })
+      })
     })
-
-    if (!options.localMode) {
-      nextComponentOffsetX += compWidth + LAYOUT_CONFIG.componentGap
-    }
+  } else {
+    // Pack components in rows aiming for a 16:9 ratio
+    const totalArea = compBoxes.reduce((sum, b) => sum + (b.maxX - b.minX) * (b.maxY - b.minY), 0)
+    const targetWidth = Math.max(800, Math.sqrt(totalArea * (16 / 9)))
+    
+    let currentX = 0
+    let currentY = 0
+    let currentRowHeight = 0
+    
+    compBoxes.forEach((box, i) => {
+      const compWidth = box.maxX - box.minX
+      const compHeight = box.maxY - box.minY
+      
+      if (i > 0 && currentX + compWidth > targetWidth) {
+        currentX = 0
+        currentY += currentRowHeight + LAYOUT_CONFIG.componentGap
+        currentRowHeight = 0
+      }
+      
+      const offsetX = currentX - box.minX
+      const offsetY = currentY - box.minY
+      
+      box.nodes.forEach(n => {
+        finalPositions.set(n.id, {
+          x: n.x + offsetX - n.width / 2,
+          y: n.y + offsetY - n.height / 2
+        })
+      })
+      
+      currentX += compWidth + LAYOUT_CONFIG.componentGap
+      currentRowHeight = Math.max(currentRowHeight, compHeight)
+    })
   }
 
   return finalPositions

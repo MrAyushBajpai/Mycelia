@@ -35,6 +35,11 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
         className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30"
         style={{ borderColor: color }}
       />
+      <Handle type="source" position={Position.Top} id="top-source" className="opacity-0 pointer-events-none" />
+      <Handle type="target" position={Position.Top} id="top-target" className="opacity-0 pointer-events-none" />
+      <Handle type="source" position={Position.Bottom} id="bottom-source" className="opacity-0 pointer-events-none" />
+      <Handle type="target" position={Position.Bottom} id="bottom-target" className="opacity-0 pointer-events-none" />
+      <Handle type="source" position={Position.Left} id="left-source" className="opacity-0 pointer-events-none" />
       <div 
         className="text-[12px] font-medium uppercase tracking-[0.15em]" 
         style={{ color }}
@@ -47,6 +52,7 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
         className="!bg-[#09090b] !border-[1.5px] !w-2.5 !h-2.5 transition-colors hover:!bg-white/30"
         style={{ borderColor: color }}
       />
+      <Handle type="target" position={Position.Right} id="right-target" className="opacity-0 pointer-events-none" />
     </div>
   )
 }
