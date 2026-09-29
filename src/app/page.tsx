@@ -8,6 +8,7 @@ import { Toolbar } from "@/components/toolbar"
 import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
+import { Sidebar } from "@/components/sidebar"
 
 const SEED_NODES = [
   { id: "c-family", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Family", color: "#ef4444" } },
@@ -48,16 +49,7 @@ export default function Home() {
   return (
     <ReactFlowProvider>
       <main className="relative flex-1">
-        {/* Branding */}
-        <div className="absolute top-5 left-6 z-40 flex items-center gap-2.5 select-none">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-              <circle cx="12" cy="12" r="2" />
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-          </div>
-          <span className="text-sm font-medium text-white/50 tracking-wider">MYCELIA</span>
-        </div>
+        <Sidebar />
         <SearchBar />
         <Toolbar />
         <CommandBar />
