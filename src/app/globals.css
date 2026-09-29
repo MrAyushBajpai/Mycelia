@@ -121,6 +121,7 @@
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
   .react-flow {
     @apply font-sans;
@@ -129,6 +130,16 @@
 
 /* Custom scrollbar for sidebar */
 @layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  input[type="number"]:hover::-webkit-inner-spin-button,
+  input[type="number"]:hover::-webkit-outer-spin-button {
+    opacity: 0.8;
+  }
+  
   * {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
