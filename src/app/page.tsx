@@ -8,7 +8,6 @@ import { Toolbar } from "@/components/toolbar"
 import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
-import { Sidebar } from "@/components/sidebar"
 import { SEED_NODES, SEED_EDGES } from "@/lib/seed-data"
 
 export default function Home() {
@@ -26,7 +25,6 @@ export default function Home() {
   return (
     <ReactFlowProvider>
       <main className="relative flex-1">
-        <Sidebar />
         <SearchBar />
         <Toolbar />
         <CommandBar />

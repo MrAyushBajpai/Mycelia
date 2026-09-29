@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from "react"
 import { ReactFlowProvider } from "@xyflow/react"
 import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
-import { Sidebar } from "@/components/sidebar"
 import { ContactDetail } from "@/components/panels/contact-detail"
 import { SEED_NODES, SEED_EDGES } from "@/lib/seed-data"
 import { Button } from "@/components/ui/button"
@@ -77,8 +76,7 @@ export default function PeoplePage() {
 
   return (
     <ReactFlowProvider>
-      <main className="relative flex-1 bg-[#050505] min-h-screen pl-[260px] flex flex-col">
-        <Sidebar />
+      <main className="relative flex-1 bg-[#050505] min-h-screen flex flex-col">
         <SearchBar />
         <ContactDetail />
         {addPersonOpen && <AddPersonDialog open={addPersonOpen} onOpenChange={setAddPersonOpen} />}
