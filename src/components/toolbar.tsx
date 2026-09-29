@@ -42,22 +42,22 @@ export function Toolbar() {
 
   return (
     <>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2 items-center p-2 rounded-full bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-5 duration-700">
-        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setPersonOpen(true)}>
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-1 items-center p-1.5 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)] animate-in slide-in-from-bottom-5 duration-700">
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setPersonOpen(true)} title="Add a new person">
           <User size={14} className="mr-1.5" />
           Add Person
         </Button>
-        <div className="w-px h-4 bg-white/10" />
-        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setClusterOpen(true)}>
+        <div className="w-px h-5 bg-white/[0.06]" />
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setClusterOpen(true)} title="Add a new circle/group">
           <Users size={14} className="mr-1.5" />
           Add Circle
         </Button>
-        <div className="w-px h-4 bg-white/10" />
+        <div className="w-px h-5 bg-white/[0.06]" />
         <Button variant="ghost" size="icon-sm" className="rounded-full w-8 h-8 hover:bg-white/10 text-white/70 hover:text-white flex items-center justify-center" onClick={() => setImportOpen(true)} title="Import CSV">
           <UploadCloud size={14} />
         </Button>
 
-        <div className="w-px h-4 bg-white/10" />
+        <div className="w-px h-5 bg-white/[0.06]" />
         <div className="relative">
           <div className="flex items-center gap-1.5 px-3 h-8 rounded-full hover:bg-white/5 transition-colors">
             <Search size={14} className="text-white/50" />
@@ -69,6 +69,7 @@ export function Toolbar() {
               placeholder="Search..."
               className="bg-transparent text-sm text-white/90 outline-none w-36 placeholder:text-white/30"
             />
+            {!query && <kbd className="text-[10px] text-white/20 bg-white/[0.04] border border-white/[0.06] rounded px-1 py-0.5 font-mono">⌘K</kbd>}
           </div>
           {showResults && results.length > 0 && (
             <div className="absolute bottom-12 left-0 w-full bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden p-1">

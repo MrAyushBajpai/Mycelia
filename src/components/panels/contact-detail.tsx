@@ -99,11 +99,16 @@ export function ContactDetail() {
   }
 
   return (
-    <aside className="absolute right-2 top-2 bottom-2 w-[calc(100vw-16px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 z-10 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">{String(data.label)}</h2>
-        <button onClick={() => selectNode(null)} className="text-muted-foreground hover:text-foreground">
-          <X size={18} />
+    <aside className="absolute right-3 top-3 bottom-3 w-[calc(100vw-24px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] p-5 z-10 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-sm font-semibold text-white/50 uppercase">
+            {String(data.label).charAt(0)}
+          </div>
+          <h2 className="text-lg font-semibold tracking-tight">{String(data.label)}</h2>
+        </div>
+        <button onClick={() => selectNode(null)} className="text-white/30 hover:text-white/70 transition-colors p-1 rounded-lg hover:bg-white/[0.06]">
+          <X size={16} />
         </button>
       </div>
 
@@ -173,9 +178,9 @@ export function ContactDetail() {
           ) : (
             <div className="space-y-2">
               {interactions.map((i) => (
-                <div key={i.id} className="border-l-2 border-muted pl-3 py-1">
-                  <p>{i.note}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div key={i.id} className="border-l border-white/[0.08] pl-3 py-1.5">
+                  <p className="text-sm">{i.note}</p>
+                  <p className="text-[11px] text-white/30 mt-0.5">
                     {new Date(i.occurredAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -185,8 +190,8 @@ export function ContactDetail() {
         </Section>
       </div>
 
-      <Button variant="destructive" size="sm" className="w-full mt-4" onClick={() => deleteNode(node.id)}>
-        <Trash2 size={14} data-icon="inline-start" />
+      <Button variant="ghost" size="sm" className="w-full mt-4 text-white/30 hover:text-destructive hover:bg-destructive/10" onClick={() => deleteNode(node.id)}>
+        <Trash2 size={13} data-icon="inline-start" />
         Remove
       </Button>
     </aside>
@@ -196,7 +201,7 @@ export function ContactDetail() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">{title}</h3>
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30 mb-2.5">{title}</h3>
       {children}
     </div>
   )

@@ -38,9 +38,9 @@ export function AddEdgeLabelDialog({ open, connection, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] text-white rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Label this connection</DialogTitle>
+          <DialogTitle className="text-white/90">Label this connection</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

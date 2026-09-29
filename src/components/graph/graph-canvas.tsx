@@ -24,8 +24,8 @@ const nodeTypes: NodeTypes = {
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "smoothstep",
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.3)" },
-  style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.15)" },
+  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.15)" },
+  style: { strokeWidth: 1, stroke: "rgba(255, 255, 255, 0.08)" },
   animated: true,
 }
 
@@ -53,8 +53,8 @@ export function GraphCanvas() {
         fitView
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={24} size={1.5} color="rgba(255, 255, 255, 0.08)" />
-        <Controls showInteractive={false} />
+        <Background gap={32} size={1} color="rgba(255, 255, 255, 0.04)" />
+        <Controls showInteractive={false} className="!bg-transparent" />
       </ReactFlow>
 
       <AddEdgeLabelDialog

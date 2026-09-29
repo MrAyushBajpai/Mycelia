@@ -16,21 +16,24 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
   return (
     <div
       className={cn(
-        "rounded-3xl border-2 px-6 py-3 transition-all duration-500 relative animate-in zoom-in-90 duration-700 fade-in",
-        "bg-black/80 backdrop-blur-xl shadow-2xl",
-        selected ? "scale-110 shadow-[0_0_30px_var(--cluster-color)] z-10" : "hover:scale-105"
+        "rounded-full border-[1.5px] px-6 py-3 transition-all duration-300 cursor-pointer",
+        selected 
+          ? "scale-110 z-10" 
+          : "hover:scale-105"
       )}
       style={{ 
-        borderColor: color,
-        "--cluster-color": `${color}40` // Add opacity to hex for shadow
-      } as React.CSSProperties}
+        borderColor: `${color}80`,
+        backgroundColor: `${color}12`,
+        boxShadow: selected 
+          ? `0 0 32px ${color}25, 0 0 12px ${color}15` 
+          : 'none',
+      }}
     >
-      <div 
-        className="absolute inset-0 rounded-3xl opacity-20 pointer-events-none"
-        style={{ backgroundColor: color }}
-      />
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-0 !h-0" />
-      <div className="text-xs font-bold uppercase tracking-[0.2em] relative z-10" style={{ color, textShadow: `0 0 10px ${color}` }}>
+      <div 
+        className="text-xs font-bold uppercase tracking-[0.2em]" 
+        style={{ color }}
+      >
         {d.label}
       </div>
       <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-0 !h-0" />
