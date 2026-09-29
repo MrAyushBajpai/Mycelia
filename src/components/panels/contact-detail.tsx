@@ -159,7 +159,23 @@ export function ContactDetail() {
         <Section title="Follow-Up">
           <DisplayField label="Last contacted" value={lastContactedStr} />
           <DisplayField label="Next contact" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
-          <EditableField label="Cadence (days)" value={data.cadenceDays ? String(data.cadenceDays) : ""} onChange={(v) => updateField("cadenceDays", v)} type="number" min={1} />
+          <div className="flex items-center justify-between py-1.5 gap-4 group">
+            <span className="text-muted-foreground shrink-0">Schedule</span>
+            <select
+              value={(data.cadenceDays as number) || ""}
+              onChange={(e) => updateField("cadenceDays", e.target.value)}
+              className="bg-transparent text-right text-sm outline-none w-full min-w-0 text-white/90 focus:text-primary transition-colors cursor-pointer appearance-none text-right [&>option]:bg-[#121212] [&>option]:text-white/90"
+              style={{ textAlignLast: "right" }}
+            >
+              <option value="">No schedule</option>
+              <option value="7">Weekly</option>
+              <option value="14">Every 2 weeks</option>
+              <option value="30">Monthly</option>
+              <option value="90">Quarterly</option>
+              <option value="180">Every 6 months</option>
+              <option value="365">Yearly</option>
+            </select>
+          </div>
         </Section>
 
         {connectedNodes.length > 0 && (
