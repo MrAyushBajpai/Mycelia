@@ -14,20 +14,23 @@ export function Toolbar() {
   const [query, setQuery] = useState("")
   const [showResults, setShowResults] = useState(false)
 
-  const { nodes, selectNode } = useGraphStore()
+  const selectNode = useGraphStore(s => s.selectNode)
   const reactFlow = useReactFlow()
 
+  // We only run the search logic dynamically when typing, fetching state to avoid subscription lag
   const results = useMemo(() => {
     if (!query.trim()) return []
     const q = query.toLowerCase()
-    return nodes.filter((n) => {
+    const currentNodes = useGraphStore.getState().nodes
+    return currentNodes.filter((n) => {
       const label = String((n.data as Record<string, unknown>).label).toLowerCase()
       return label.includes(q)
     })
-  }, [query, nodes])
+  }, [query]) // we omit `nodes` so typing updates it, but drag does not!
 
   function focusNode(id: string) {
-    const node = nodes.find((n) => n.id === id)
+    const currentNodes = useGraphStore.getState().nodes
+    const node = currentNodes.find((n) => n.id === id)
     if (!node) return
     selectNode(id)
     reactFlow.fitView({ nodes: [node], duration: 400, padding: 2 })

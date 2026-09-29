@@ -3,6 +3,7 @@
 import { memo } from "react"
 import { Handle, Position, type NodeProps } from "@xyflow/react"
 import { cn } from "@/lib/utils"
+import { useTimeStore } from "@/stores/time-store"
 
 export type PersonNodeData = {
   label: string
@@ -12,11 +13,11 @@ export type PersonNodeData = {
 
 export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps) {
   const d = data as PersonNodeData
+  const now = useTimeStore((s) => s.now)
   
   let isOverdue = false
   if (d.cadenceDays && d.lastContacted) {
     const last = new Date(d.lastContacted).getTime()
-    const now = Date.now()
     const diffDays = (now - last) / (1000 * 60 * 60 * 24)
     if (diffDays > d.cadenceDays) {
       isOverdue = true

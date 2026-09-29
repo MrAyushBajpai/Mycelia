@@ -17,9 +17,11 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [clusterId, setClusterId] = useState("")
-  const { nodes, edges, setNodes, setEdges } = useGraphStore()
+  const setNodes = useGraphStore((s) => s.setNodes)
+  const setEdges = useGraphStore((s) => s.setEdges)
 
-  const clusters = nodes.filter((n) => n.type === "cluster")
+  // Only subscribe to clusters to populate the dropdown
+  const clusters = useGraphStore((s) => s.nodes.filter(n => n.type === "cluster"))
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -33,10 +35,12 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
       data: { label: name.trim(), email: email || null, phone: phone || null },
     }
 
-    setNodes([...nodes, newNode])
+    const currentNodes = useGraphStore.getState().nodes
+    setNodes([...currentNodes, newNode])
 
     if (clusterId) {
-      setEdges([...edges, { id: `e-${Date.now()}`, source: id, target: clusterId }])
+      const currentEdges = useGraphStore.getState().edges
+      setEdges([...currentEdges, { id: `e-${Date.now()}`, source: id, target: clusterId }])
     }
 
     setName("")

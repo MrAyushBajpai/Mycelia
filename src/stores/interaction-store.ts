@@ -8,13 +8,14 @@ export type Interaction = {
 }
 
 type InteractionState = {
-  interactions: Interaction[]
+  // mapped by contactId for O(1) lookup
+  interactionsByContact: Record<string, Interaction[]>
   addInteraction: (contactId: string, note: string, occurredAt?: string) => void
   getByContact: (contactId: string) => Interaction[]
 }
 
 export const useInteractionStore = create<InteractionState>((set, get) => ({
-  interactions: [],
+  interactionsByContact: {},
 
   addInteraction: (contactId, note, occurredAt) => {
     const interaction: Interaction = {
@@ -23,12 +24,22 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
       note,
       occurredAt: occurredAt ? new Date(occurredAt).toISOString() : new Date().toISOString(),
     }
-    set({ interactions: [...get().interactions, interaction] })
+    set((state) => {
+      const existing = state.interactionsByContact[contactId] || []
+      // Insert sorted (newest first assuming mostly adding new ones)
+      const updated = [interaction, ...existing].sort(
+        (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+      )
+      return {
+        interactionsByContact: {
+          ...state.interactionsByContact,
+          [contactId]: updated,
+        },
+      }
+    })
   },
 
   getByContact: (contactId) => {
-    return get()
-      .interactions.filter((i) => i.contactId === contactId)
-      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
+    return get().interactionsByContact[contactId] || []
   },
 }))

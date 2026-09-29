@@ -8,22 +8,38 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export function ContactDetail() {
-  const { nodes, selectedNodeId, selectNode, deleteNode, setNodes, getConnections } = useGraphStore()
-  const { addInteraction, getByContact } = useInteractionStore()
+  const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
+  const node = useGraphStore((s) => s.nodes.find((n) => n.id === selectedNodeId))
+  const selectNode = useGraphStore((s) => s.selectNode)
+  const deleteNode = useGraphStore((s) => s.deleteNode)
+  const setNodes = useGraphStore((s) => s.setNodes)
+  
+  // We only subscribe to edges here so that dragging a node (which updates 'nodes' reference)
+  // doesn't cause a re-render loop via getConnections.
+  const edges = useGraphStore((s) => s.edges)
+  
+  const interactions = useInteractionStore((s) => s.interactionsByContact[node?.id || ""] || [])
+  const addInteraction = useInteractionStore((s) => s.addInteraction)
+
   const [logInput, setLogInput] = useState("")
   const [logDate, setLogDate] = useState("")
 
   const [newDateLabel, setNewDateLabel] = useState("")
   const [newDateValue, setNewDateValue] = useState("")
 
-  const node = nodes.find((n) => n.id === selectedNodeId)
   if (!node || node.type === "cluster") return null
 
   const data = node.data as Record<string, unknown>
   const customDates = (data.customDates as Record<string, string>) || {}
   
-  const interactions = getByContact(node.id)
-  const connectedNodes = getConnections(node.id)
+  // Compute connections manually to avoid store thrashing on drag
+  const connectedNodes = edges
+    .filter((e) => e.source === node.id || e.target === node.id)
+    .map((e) => {
+      const otherId = e.source === node.id ? e.target : e.source
+      const other = useGraphStore.getState().nodes.find((n) => n.id === otherId)
+      return { edge: e, name: other ? String((other.data as Record<string, unknown>).label) : "?" }
+    })
 
   function handleLog(e: React.FormEvent) {
     e.preventDefault()
@@ -35,7 +51,8 @@ export function ContactDetail() {
     const newInteractionTime = new Date(d).getTime()
     
     if (newInteractionTime >= currentLastContacted) {
-      const updated = nodes.map((n) =>
+      const currentNodes = useGraphStore.getState().nodes
+      const updated = currentNodes.map((n) =>
         n.id === node!.id ? { ...n, data: { ...n.data, lastContacted: new Date(d).toISOString() } } : n
       )
       setNodes(updated)
@@ -45,7 +62,8 @@ export function ContactDetail() {
   }
 
   function updateField(field: string, value: string) {
-    const updated = nodes.map((n) => {
+    const currentNodes = useGraphStore.getState().nodes
+    const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
       const parsedValue = field === "cadenceDays" ? (value ? parseInt(value, 10) : null) : (value || null)
       return { ...n, data: { ...n.data, [field]: parsedValue } }
@@ -56,7 +74,8 @@ export function ContactDetail() {
   function handleAddCustomDate(e: React.FormEvent) {
     e.preventDefault()
     if (!newDateLabel.trim() || !newDateValue) return
-    const updated = nodes.map((n) => {
+    const currentNodes = useGraphStore.getState().nodes
+    const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
       const existing = (n.data.customDates as Record<string, string>) || {}
       return { ...n, data: { ...n.data, customDates: { ...existing, [newDateLabel.trim()]: newDateValue } } }
@@ -67,7 +86,8 @@ export function ContactDetail() {
   }
 
   function removeCustomDate(labelToRemove: string) {
-    const updated = nodes.map((n) => {
+    const currentNodes = useGraphStore.getState().nodes
+    const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
       const existing = { ...((n.data.customDates as Record<string, string>) || {}) }
       delete existing[labelToRemove]

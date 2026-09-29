@@ -17,7 +17,7 @@ type Props = {
 export function AddClusterDialog({ open, onOpenChange }: Props) {
   const [name, setName] = useState("")
   const [color, setColor] = useState(COLORS[0])
-  const { nodes, setNodes } = useGraphStore()
+  const setNodes = useGraphStore((s) => s.setNodes)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -31,7 +31,8 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
       data: { label: name.trim(), color },
     }
 
-    setNodes([...nodes, newNode])
+    const currentNodes = useGraphStore.getState().nodes
+    setNodes([...currentNodes, newNode])
     setName("")
     setColor(COLORS[0])
     onOpenChange(false)

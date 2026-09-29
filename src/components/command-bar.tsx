@@ -10,7 +10,7 @@ export function CommandBar() {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState("")
   
-  const { nodes, setNodes } = useGraphStore()
+  const setNodes = useGraphStore(s => s.setNodes)
   const { addInteraction } = useInteractionStore()
 
   useEffect(() => {
@@ -38,19 +38,35 @@ export function CommandBar() {
     dateStringMatch = result.text
   }
 
+  // O(N) instead of O(W*N)
+  const nameIndex = new Map<string, string>() // lowercase label -> id
+  if (open) {
+    const nodes = useGraphStore.getState().nodes
+    nodes.forEach(n => {
+      const label = String((n.data as Record<string, unknown>).label).toLowerCase()
+      nameIndex.set(label, n.id)
+    })
+  }
+
   const renderedText = words.map((word, i) => {
     if (word.startsWith("@") && word.length > 1) {
-      const search = word.substring(1).toLowerCase()
-      // Remove punctuation for matching
-      const cleanSearch = search.replace(/[.,!?;:]$/, "")
+      const search = word.substring(1).toLowerCase().replace(/[.,!?;:]$/, "")
       
-      const node = nodes.find(n => {
-        const label = String((n.data as Record<string, unknown>).label).toLowerCase()
-        return label === cleanSearch || label.startsWith(cleanSearch)
-      })
+      // Check exact match first
+      let matchedId = nameIndex.get(search)
       
-      if (node) {
-        matchedNodes.add(node.id)
+      // Fallback to startsWith if no exact match
+      if (!matchedId) {
+        for (const [label, id] of nameIndex.entries()) {
+          if (label.startsWith(search)) {
+            matchedId = id
+            break
+          }
+        }
+      }
+      
+      if (matchedId) {
+        matchedNodes.add(matchedId)
         return <span key={i} className="text-primary font-medium bg-primary/10 rounded px-1">{word} </span>
       }
     }
@@ -78,12 +94,19 @@ export function CommandBar() {
     words.forEach(word => {
       if (word.startsWith("@") && word.length > 1) {
         const search = word.substring(1).toLowerCase().replace(/[.,!?;:]$/, "")
-        const isMatch = Array.from(matchedNodes).some(id => {
-          const node = nodes.find(n => n.id === id)
-          if (!node) return false
-          const label = String((node.data as Record<string, unknown>).label).toLowerCase()
-          return label === search || label.startsWith(search)
-        })
+        
+        let isMatch = false
+        if (nameIndex.has(search) && matchedNodes.has(nameIndex.get(search)!)) {
+          isMatch = true
+        } else {
+          for (const [label, id] of nameIndex.entries()) {
+            if (label.startsWith(search) && matchedNodes.has(id)) {
+              isMatch = true
+              break
+            }
+          }
+        }
+        
         if (isMatch) {
           cleanInput = cleanInput.replace(word, "")
         }
@@ -104,6 +127,7 @@ export function CommandBar() {
     }
 
     // Log interaction for every matched node using the cleaned input
+    const nodes = useGraphStore.getState().nodes
     matchedNodes.forEach(id => {
       addInteraction(id, cleanInput, parsedDate)
       
@@ -153,7 +177,7 @@ export function CommandBar() {
               <div>
                 <span className="font-semibold text-foreground">Linking to: </span>
                 {matchedNodes.size > 0 
-                  ? Array.from(matchedNodes).map(id => nodes.find(n => n.id === id)?.data.label).join(", ")
+                  ? Array.from(matchedNodes).map(id => useGraphStore.getState().nodes.find(n => n.id === id)?.data.label).join(", ")
                   : "None (type @name)"}
               </div>
               <div>
