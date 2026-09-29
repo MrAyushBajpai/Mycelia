@@ -9,19 +9,19 @@ export type Interaction = {
 
 type InteractionState = {
   interactions: Interaction[]
-  addInteraction: (contactId: string, note: string) => void
+  addInteraction: (contactId: string, note: string, occurredAt?: string) => void
   getByContact: (contactId: string) => Interaction[]
 }
 
 export const useInteractionStore = create<InteractionState>((set, get) => ({
   interactions: [],
 
-  addInteraction: (contactId, note) => {
+  addInteraction: (contactId, note, occurredAt) => {
     const interaction: Interaction = {
       id: `i-${Date.now()}`,
       contactId,
       note,
-      occurredAt: new Date().toISOString(),
+      occurredAt: occurredAt ? new Date(occurredAt).toISOString() : new Date().toISOString(),
     }
     set({ interactions: [...get().interactions, interaction] })
   },

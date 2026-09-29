@@ -11,6 +11,7 @@ export function ContactDetail() {
   const { nodes, edges, selectedNodeId, selectNode, deleteNode, setNodes } = useGraphStore()
   const { addInteraction, getByContact } = useInteractionStore()
   const [logInput, setLogInput] = useState("")
+  const [logDate, setLogDate] = useState("")
 
   const node = nodes.find((n) => n.id === selectedNodeId)
   if (!node || node.type === "cluster") return null
@@ -27,13 +28,20 @@ export function ContactDetail() {
   function handleLog(e: React.FormEvent) {
     e.preventDefault()
     if (!logInput.trim()) return
-    addInteraction(node!.id, logInput.trim())
-    // update last contacted
-    const updated = nodes.map((n) =>
-      n.id === node!.id ? { ...n, data: { ...n.data, lastContacted: new Date().toISOString() } } : n
-    )
-    setNodes(updated)
+    const d = logDate || new Date().toISOString().split("T")[0]
+    addInteraction(node!.id, logInput.trim(), d)
+    
+    const currentLastContacted = data.lastContacted ? new Date(data.lastContacted as string).getTime() : 0
+    const newInteractionTime = new Date(d).getTime()
+    
+    if (newInteractionTime >= currentLastContacted) {
+      const updated = nodes.map((n) =>
+        n.id === node!.id ? { ...n, data: { ...n.data, lastContacted: new Date(d).toISOString() } } : n
+      )
+      setNodes(updated)
+    }
     setLogInput("")
+    setLogDate("")
   }
 
   function updateField(field: string, value: string) {
@@ -75,16 +83,26 @@ export function ContactDetail() {
         )}
 
         <Section title="Interactions">
-          <form onSubmit={handleLog} className="flex gap-1.5 mb-3">
-            <Input
-              value={logInput}
-              onChange={(e) => setLogInput(e.target.value)}
-              placeholder="Log an interaction..."
-              className="h-8 text-xs"
+          <form onSubmit={handleLog} className="flex flex-col gap-1.5 mb-3">
+            <div className="flex gap-1.5">
+              <Input
+                value={logInput}
+                onChange={(e) => setLogInput(e.target.value)}
+                placeholder="Log an interaction..."
+                className="h-8 text-xs"
+              />
+              <Button type="submit" size="icon-sm" variant="ghost">
+                <Send size={14} />
+              </Button>
+            </div>
+            <input
+              type="date"
+              value={logDate}
+              onChange={(e) => setLogDate(e.target.value)}
+              max={new Date().toISOString().split("T")[0]}
+              className="text-xs text-muted-foreground bg-transparent outline-none self-start"
+              title="Date of interaction (defaults to today)"
             />
-            <Button type="submit" size="icon-sm" variant="ghost">
-              <Send size={14} />
-            </Button>
           </form>
           {interactions.length === 0 ? (
             <p className="text-muted-foreground">No interactions logged.</p>
