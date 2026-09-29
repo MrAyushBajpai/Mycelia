@@ -9,14 +9,14 @@ import { CommandBar } from "@/components/command-bar"
 import { useGraphStore } from "@/stores/graph-store"
 
 const SEED_NODES = [
-  { id: "c-family", type: "cluster", position: { x: 500, y: 150 }, data: { label: "Family", color: "#ef4444" } },
-  { id: "c-work", type: "cluster", position: { x: 500, y: 0 }, data: { label: "Design Team", color: "#3b82f6" } },
-  { id: "c-college", type: "cluster", position: { x: 500, y: 300 }, data: { label: "College", color: "#10b981" } },
-  { id: "p-mom", type: "person", position: { x: 200, y: 100 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString() } },
-  { id: "p-dad", type: "person", position: { x: 200, y: 220 }, data: { label: "Dad" } },
-  { id: "p-alex", type: "person", position: { x: 350, y: 50 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(Date.now() - 15 * 86400000).toISOString(), nextActionReason: "Project check-in" } },
-  { id: "p-sarah", type: "person", position: { x: 350, y: 160 }, data: { label: "Sarah", cadenceDays: 30 } },
-  { id: "p-jordan", type: "person", position: { x: 350, y: 280 }, data: { label: "Jordan", customDates: { "Birthday": new Date().toISOString() } } },
+  { id: "c-family", type: "cluster", position: { x: 1000, y: 300 }, data: { label: "Family", color: "#ef4444" } },
+  { id: "c-work", type: "cluster", position: { x: 1000, y: 0 }, data: { label: "Design Team", color: "#3b82f6" } },
+  { id: "c-college", type: "cluster", position: { x: 1000, y: 600 }, data: { label: "College", color: "#10b981" } },
+  { id: "p-mom", type: "person", position: { x: 200, y: 200 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString() } },
+  { id: "p-dad", type: "person", position: { x: 200, y: 400 }, data: { label: "Dad" } },
+  { id: "p-alex", type: "person", position: { x: 600, y: 0 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(Date.now() - 15 * 86400000).toISOString(), nextActionReason: "Project check-in" } },
+  { id: "p-sarah", type: "person", position: { x: 600, y: 300 }, data: { label: "Sarah", cadenceDays: 30 } },
+  { id: "p-jordan", type: "person", position: { x: 600, y: 600 }, data: { label: "Jordan", customDates: { "Birthday": new Date().toISOString() } } },
 ]
 
 const SEED_EDGES = [
