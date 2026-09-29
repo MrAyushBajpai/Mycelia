@@ -157,9 +157,29 @@ export function computeLayout(
       fx: isPinned ? n.position.x : null,
       fy: isPinned ? n.position.y : null,
       rank,
-      isPinned
+      isPinned,
+      compId: components.find(c => c.nodes.some(cn => cn.id === n.id))!.id
     }
   })
+
+  // Determine base offsets per component so forceX doesn't stretch/collapse them globally
+  const compBaseX = new Map<string, number>()
+  for (const comp of components) {
+    if (resetPins) {
+      compBaseX.set(comp.id, 0)
+    } else {
+      const cNodes = simNodes.filter(sn => sn.compId === comp.id)
+      const pinned = cNodes.filter(sn => sn.isPinned)
+      const referenceNodes = pinned.length > 0 ? pinned : cNodes
+      let minBaseX = Infinity
+      referenceNodes.forEach(sn => {
+        const impliedBase = sn.x - sn.rank * LAYOUT_CONFIG.columnGap
+        minBaseX = Math.min(minBaseX, impliedBase)
+      })
+      if (minBaseX === Infinity) minBaseX = 0
+      compBaseX.set(comp.id, minBaseX)
+    }
+  }
 
   // Barycenter initialization for Y if resetting
   if (resetPins) {
@@ -201,8 +221,8 @@ export function computeLayout(
     .randomSource(randomSource)
     .alpha(alpha)
     .force("link", forceLink(simEdges).id((d: any) => d.id).distance(LAYOUT_CONFIG.forceLinkDistance).strength(0.1))
-    .force("x", forceX((d: any) => d.rank * LAYOUT_CONFIG.columnGap).strength(0.6))
-    .force("y", forceY(0).strength(LAYOUT_CONFIG.gravityStrength))
+    .force("x", forceX((d: any) => compBaseX.get(d.compId)! + d.rank * LAYOUT_CONFIG.columnGap).strength(0.6))
+    .force("y", forceY((d: any) => resetPins ? 0 : d.y).strength(LAYOUT_CONFIG.gravityStrength))
     .force("collide", forceCollide((d: any) => Math.max(d.w, d.h) / 1.5 + LAYOUT_CONFIG.forceCollidePadding).iterations(3))
     .force("direction", directionForce)
     .stop()
