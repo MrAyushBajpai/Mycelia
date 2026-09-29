@@ -20,13 +20,38 @@ export function NotificationMenu() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function handleOutsideInteraction(e: Event) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false)
       }
     }
-    if (open) document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpen(false)
+        e.stopPropagation() 
+      }
+    }
+    
+    function handleGlobalKeys(e: KeyboardEvent) {
+      const activeTag = document.activeElement?.tagName
+      const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA"
+      if (!isTyping && e.key.toLowerCase() === "n") {
+        e.preventDefault()
+        setOpen(o => !o)
+      }
+    }
+    
+    document.addEventListener("keydown", handleGlobalKeys)
+
+    if (open) {
+      document.addEventListener("pointerdown", handleOutsideInteraction, { capture: true })
+      document.addEventListener("keydown", handleEsc, { capture: true })
+    }
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeys)
+      document.removeEventListener("pointerdown", handleOutsideInteraction, { capture: true })
+      document.removeEventListener("keydown", handleEsc, { capture: true })
+    }
   }, [open])
 
   function handleNotificationClick(nodeId?: string) {
@@ -47,6 +72,7 @@ export function NotificationMenu() {
         size="icon" 
         className="relative text-white/50 hover:text-white/90 hover:bg-white/10"
         onClick={() => setOpen(!open)}
+        title="Notifications (N)"
       >
         <Bell size={16} />
         {unreadCount > 0 && (

@@ -29,7 +29,19 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   selectedNodeId: null,
 
   onNodesChange: (changes) => {
-    set({ nodes: applyNodeChanges(changes, get().nodes) })
+    const nextNodes = applyNodeChanges(changes, get().nodes)
+    const currentSelectedId = get().selectedNodeId
+    
+    // If we have a selection, but React Flow natively deselected it (e.g. via Esc)
+    if (currentSelectedId) {
+      const activeNode = nextNodes.find(n => n.id === currentSelectedId)
+      if (activeNode && activeNode.selected === false) {
+        set({ nodes: nextNodes, selectedNodeId: null })
+        return
+      }
+    }
+    
+    set({ nodes: nextNodes })
   },
 
   onEdgesChange: (changes) => {
