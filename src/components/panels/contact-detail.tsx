@@ -180,7 +180,7 @@ export function ContactDetail() {
             />
           </div>
           <div className="flex items-center justify-between py-1.5 gap-4 group mt-1 pt-2 border-t border-white/5">
-            <span className="text-[12px] font-normal text-white/40 shrink-0">Cadence</span>
+            <span className="text-[12px] font-normal text-white/40 shrink-0">Keep in touch</span>
             <select
               value={(data.cadenceDays as number) || ""}
               onChange={(e) => updateField("cadenceDays", e.target.value)}
