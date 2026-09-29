@@ -2,8 +2,10 @@ import { create } from "zustand"
 import {
   type Node,
   type Edge,
+  type Connection,
   applyNodeChanges,
   applyEdgeChanges,
+  addEdge,
   type NodeChange,
   type EdgeChange,
 } from "@xyflow/react"
@@ -14,9 +16,11 @@ type GraphState = {
   selectedNodeId: string | null
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
+  onConnect: (connection: Connection) => void
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
+  deleteNode: (id: string) => void
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -32,7 +36,20 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set({ edges: applyEdgeChanges(changes, get().edges) })
   },
 
+  onConnect: (connection) => {
+    set({ edges: addEdge({ ...connection, id: `e-${Date.now()}` }, get().edges) })
+  },
+
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   selectNode: (id) => set({ selectedNodeId: id }),
+
+  deleteNode: (id) => {
+    const { nodes, edges, selectedNodeId } = get()
+    set({
+      nodes: nodes.filter((n) => n.id !== id),
+      edges: edges.filter((e) => e.source !== id && e.target !== id),
+      selectedNodeId: selectedNodeId === id ? null : selectedNodeId,
+    })
+  },
 }))

@@ -5,6 +5,8 @@ import {
   Background,
   Controls,
   type NodeTypes,
+  MarkerType,
+  type DefaultEdgeOptions,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 
@@ -17,8 +19,13 @@ const nodeTypes: NodeTypes = {
   cluster: ClusterNode,
 }
 
+const defaultEdgeOptions: DefaultEdgeOptions = {
+  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
+  style: { strokeWidth: 1.5 },
+}
+
 export function GraphCanvas() {
-  const { nodes, edges, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, selectNode } = useGraphStore()
 
   return (
     <div className="h-screen w-full">
@@ -27,9 +34,12 @@ export function GraphCanvas() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
         onNodeClick={(_, node) => selectNode(node.id)}
         onPaneClick={() => selectNode(null)}
         nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
+        deleteKeyCode={["Backspace", "Delete"]}
         fitView
         proOptions={{ hideAttribution: true }}
       >
