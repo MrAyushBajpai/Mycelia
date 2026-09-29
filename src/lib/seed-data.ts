@@ -2,11 +2,12 @@ export const SEED_NODES = [
   { id: "c-family", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Family", color: "#ef4444", description: "Immediate and extended family members." } },
   { id: "c-work", type: "cluster", position: { x: 0, y: 0 }, data: { label: "Design Team", color: "#3b82f6", description: "Collaborate on projects and share feedback." } },
   { id: "c-college", type: "cluster", position: { x: 0, y: 0 }, data: { label: "College", color: "#10b981", description: "Old friends from university days." } },
-  { id: "p-mom", type: "person", position: { x: 0, y: 0 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString() } },
-  { id: "p-dad", type: "person", position: { x: 0, y: 0 }, data: { label: "Dad" } },
-  { id: "p-alex", type: "person", position: { x: 0, y: 0 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(Date.now() - 15 * 86400000).toISOString(), nextActionReason: "Project check-in" } },
-  { id: "p-sarah", type: "person", position: { x: 0, y: 0 }, data: { label: "Sarah", cadenceDays: 30 } },
-  { id: "p-jordan", type: "person", position: { x: 0, y: 0 }, data: { label: "Jordan", customDates: { "Birthday": new Date().toISOString() } } },
+  { id: "p-mom", type: "person", position: { x: 0, y: 0 }, data: { label: "Mom", cadenceDays: 7, lastContacted: new Date(Date.now() - 3 * 86400000).toISOString(), customDates: { "Birthday": new Date(new Date().getFullYear(), new Date().getMonth(), 18).toISOString() } } },
+  { id: "p-dad", type: "person", position: { x: 0, y: 0 }, data: { label: "Dad", cadenceDays: 14, lastContacted: new Date(new Date().getFullYear(), new Date().getMonth(), -3).toISOString() } },
+  { id: "p-alex", type: "person", position: { x: 0, y: 0 }, data: { label: "Alex", cadenceDays: 14, lastContacted: new Date(new Date().getFullYear(), new Date().getMonth(), 0).toISOString(), nextActionReason: "Follow up", customDates: { "Birthday": new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString() } } },
+  { id: "p-sarah", type: "person", position: { x: 0, y: 0 }, data: { label: "Sarah", cadenceDays: 30, lastContacted: new Date(new Date().getFullYear(), new Date().getMonth(), -4).toISOString(), customDates: { "Anniversary": new Date(new Date().getFullYear(), new Date().getMonth(), 8).toISOString() } } },
+  { id: "p-jordan", type: "person", position: { x: 0, y: 0 }, data: { label: "Jordan", cadenceDays: 20, lastContacted: new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString() } },
+  { id: "p-john", type: "person", position: { x: 0, y: 0 }, data: { label: "John", cadenceDays: 30, lastContacted: new Date(new Date().getFullYear(), new Date().getMonth(), -7).toISOString() } },
 ]
 
 export const SEED_EDGES = [
