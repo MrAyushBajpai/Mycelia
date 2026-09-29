@@ -21,7 +21,7 @@ export function GraphCanvas() {
   const { nodes, edges, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
 
   return (
-    <div className="h-full w-full">
+    <div className="h-screen w-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}

@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { GraphCanvas } from "@/components/graph/graph-canvas"
 import { useGraphStore } from "@/stores/graph-store"
 
-// Seed data for demo — will be replaced by Supabase queries
 const SEED_NODES = [
   { id: "c-family", type: "cluster", position: { x: 0, y: 150 }, data: { label: "Family", color: "#ef4444" } },
   { id: "c-work", type: "cluster", position: { x: 500, y: 0 }, data: { label: "Work", color: "#3b82f6" } },
@@ -27,11 +26,15 @@ const SEED_EDGES = [
 
 export default function Home() {
   const { setNodes, setEdges } = useGraphStore()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setNodes(SEED_NODES)
     setEdges(SEED_EDGES)
+    setMounted(true)
   }, [setNodes, setEdges])
+
+  if (!mounted) return null
 
   return (
     <main className="flex-1">
