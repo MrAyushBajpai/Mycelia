@@ -42,6 +42,7 @@ export const OrganicEdge = memo(function OrganicEdge({
   const sourceNode = useInternalNode(source)
   const targetNode = useInternalNode(target)
   const allNodes = useStore(s => s.nodeLookup)
+  const allEdges = useStore(s => s.edges)
 
   const [path, labelX, labelY, hidden] = useMemo(() => {
     let sx = sourceX
@@ -89,11 +90,34 @@ export const OrganicEdge = memo(function OrganicEdge({
           const ny = n.internals.positionAbsolute.y
           const nw = n.measured?.width || 120
           const nh = n.measured?.height || 50
-          
-          // label is ~ 60x20, plus 8px padding
           if (px > nx - 38 && px < nx + nw + 38 && py > ny - 18 && py < ny + nh + 18) {
             collision = true
             break
+          }
+        }
+        
+        // Check collision against all other edges (approximate samples)
+        if (!collision) {
+          for (const e of allEdges) {
+            if (e.id === id) continue
+            const sn = allNodes.get(e.source)
+            const tn = allNodes.get(e.target)
+            if (!sn || !tn) continue
+            const sEx = sn.internals.positionAbsolute.x + (sn.measured?.width || 120)/2
+            const sEy = sn.internals.positionAbsolute.y + (sn.measured?.height || 50)/2
+            const tEx = tn.internals.positionAbsolute.x + (tn.measured?.width || 120)/2
+            const tEy = tn.internals.positionAbsolute.y + (tn.measured?.height || 50)/2
+            
+            // sample 10 points along a rough straight line for the other edge
+            for (let et = 0.1; et <= 0.9; et += 0.1) {
+              const testX = sEx + (tEx - sEx) * et
+              const testY = sEy + (tEy - sEy) * et
+              if (Math.abs(px - testX) < 40 && Math.abs(py - testY) < 18) {
+                collision = true
+                break
+              }
+            }
+            if (collision) break
           }
         }
         
@@ -106,7 +130,6 @@ export const OrganicEdge = memo(function OrganicEdge({
       }
       
       if (!found) {
-        // If all collide, default to center but mark hidden
         const [px, py] = getBezierPoint(0.5, sx, sy, tx, ty, sPos, tPos)
         finalLx = px
         finalLy = py
@@ -115,10 +138,13 @@ export const OrganicEdge = memo(function OrganicEdge({
     }
 
     return [dPath, finalLx, finalLy, isHidden]
-  }, [sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, sourceNode, targetNode, allNodes, label])
+  }, [sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, sourceNode, targetNode, allNodes, allEdges, label, id])
 
+  const zoom = useStore(s => s.transform[2])
   const isFaded = style?.opacity === 0.05
-  const showLabel = label && !isFaded && (!hidden || style?.opacity === 1) // If fully opaque (hovered), show even if hidden
+  const isOpaque = style?.opacity === 1
+  const showLabel = label && !isFaded && (zoom >= 0.5 || isOpaque) && (!hidden || isOpaque)
+  const labelScale = Math.max(1, 0.8 / zoom)
 
   return (
     <>
@@ -128,7 +154,7 @@ export const OrganicEdge = memo(function OrganicEdge({
           <div
             className="absolute nodrag nopan pointer-events-none"
             style={{
-              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
+              transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px) scale(${labelScale})`,
               background: "#09090b",
               color: "rgba(255, 255, 255, 0.6)",
               fontSize: 10,

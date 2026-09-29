@@ -61,7 +61,7 @@ export function Toolbar() {
         } else if (e.key.toLowerCase() === "l") {
           e.preventDefault()
           useGraphStore.getState().autoLayout()
-          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+          requestAnimationFrame(() => requestAnimationFrame(() => reactFlow.fitView({ padding: 0.2, minZoom: 0.5, maxZoom: 1, duration: 400 })))
         } else if (e.key.toLowerCase() === "i") {
           e.preventDefault()
           setImportOpen(true)
@@ -160,7 +160,7 @@ export function Toolbar() {
         <div className="w-px h-5 bg-white/[0.06]" />
         <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => {
           useGraphStore.getState().autoLayout()
-          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+          requestAnimationFrame(() => requestAnimationFrame(() => reactFlow.fitView({ padding: 0.2, minZoom: 0.5, maxZoom: 1, duration: 400 })))
         }} title="Tidy Graph (L)">
           <Wand2 size={14} />
           <span>Tidy</span>
@@ -169,7 +169,7 @@ export function Toolbar() {
         <div className="w-px h-5 bg-white/[0.06]" />
         <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => {
           useGraphStore.getState().autoLayout({ resetPins: true })
-          setTimeout(() => reactFlow.fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+          requestAnimationFrame(() => requestAnimationFrame(() => reactFlow.fitView({ padding: 0.2, minZoom: 0.5, maxZoom: 1, duration: 400 })))
         }} title="Reset Layout">
           <RotateCcw size={14} />
           <span>Reset</span>

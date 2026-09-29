@@ -88,7 +88,11 @@ export function GraphCanvas() {
         if (!hasLaidOut) {
           setHasLaidOut(true)
           autoLayout()
-          setTimeout(() => fitView({ padding: 0.2, maxZoom: 1, duration: 400 }), 50)
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              fitView({ padding: 0.2, minZoom: 0.5, maxZoom: 1, duration: 400 })
+            })
+          })
         } else {
           // If already laid out but a new node appeared, just do a gentle local layout
           autoLayout({ localMode: true })
