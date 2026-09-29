@@ -5,7 +5,7 @@ import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
 import { ReactFlowProvider } from "@xyflow/react"
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react"
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday, addDays, subDays, differenceInDays } from "date-fns"
+import { format, addMonths, subMonths, addWeeks, subWeeks, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday, addDays, subDays, differenceInDays } from "date-fns"
 
 export default function CalendarPage() {
   const [mounted, setMounted] = useState(false)
@@ -81,7 +81,11 @@ export default function CalendarPage() {
   const monthEnd = endOfMonth(monthStart)
   const startDate = startOfWeek(monthStart)
   const endDate = endOfWeek(monthEnd)
+  
   const calendarDays = eachDayOfInterval({ start: startDate, end: endDate })
+  const weekDays = eachDayOfInterval({ start: startOfWeek(currentDate), end: endOfWeek(currentDate) })
+  
+  const displayDays = view === "Week" ? weekDays : calendarDays
   
   const selectedEvents = events.filter(e => isSameDay(e.date, selectedDate))
   
@@ -91,8 +95,12 @@ export default function CalendarPage() {
     return diff >= -7 && diff <= 30
   }).slice(0, 5) // Show top 5 near events
 
-  const nextMonth = () => setCurrentDate(addMonths(currentDate, 1))
-  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1))
+  const nextPeriod = () => setCurrentDate(view === "Week" ? addWeeks(currentDate, 1) : addMonths(currentDate, 1))
+  const prevPeriod = () => setCurrentDate(view === "Week" ? subWeeks(currentDate, 1) : subMonths(currentDate, 1))
+  
+  const headerFormat = view === "Week" 
+    ? `${format(startOfWeek(currentDate), "MMM d")} - ${format(endOfWeek(currentDate), "MMM d, yyyy")}`
+    : format(currentDate, "MMMM yyyy")
 
   if (!mounted) return null
 
@@ -129,11 +137,11 @@ export default function CalendarPage() {
 
                   {/* Month Navigation */}
                   <div className="flex items-center gap-4">
-                    <button onClick={prevMonth} className="w-8 h-8 rounded-full bg-[#0a0a0c] border border-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+                    <button onClick={prevPeriod} className="w-8 h-8 rounded-full bg-[#0a0a0c] border border-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 transition-colors">
                       <ChevronLeft size={16} />
                     </button>
-                    <span className="text-white/90 font-medium min-w-[120px] text-center">{format(currentDate, "MMMM yyyy")}</span>
-                    <button onClick={nextMonth} className="w-8 h-8 rounded-full bg-[#0a0a0c] border border-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 transition-colors">
+                    <span className="text-white/90 font-medium min-w-[150px] text-center">{headerFormat}</span>
+                    <button onClick={nextPeriod} className="w-8 h-8 rounded-full bg-[#0a0a0c] border border-white/5 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/5 transition-colors">
                       <ChevronRight size={16} />
                     </button>
                   </div>
@@ -152,52 +160,95 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              {/* Calendar Grid */}
-              <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-                {/* Days of Week */}
-                <div className="grid grid-cols-7 border-b border-white/5">
-                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
-                    <div key={day} className="py-3 text-center text-xs font-semibold tracking-wider text-white/40 uppercase">
-                      {day}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Dates */}
-                <div className="grid grid-cols-7">
-                  {calendarDays.map((day, idx) => {
-                    const isCurrentMonth = isSameMonth(day, currentDate)
-                    const isSelected = isSameDay(day, selectedDate)
-                    const dayEvents = events.filter(e => isSameDay(e.date, day))
-                    
-                    return (
-                      <div 
-                        key={day.toISOString()}
-                        onClick={() => setSelectedDate(day)}
-                        className={`min-h-[120px] p-2 border-r border-b border-white/5 cursor-pointer transition-colors ${
-                          !isCurrentMonth ? "bg-[#050505]/50 text-white/20" : "hover:bg-white/[0.02]"
-                        } ${isSelected ? "ring-1 ring-inset ring-[#3b82f6]/50 bg-[#3b82f6]/[0.02]" : ""}`}
-                      >
-                        <div className={`text-sm font-medium mb-1 ${isToday(day) ? "text-[#3b82f6]" : (isCurrentMonth ? "text-white/60" : "text-white/20")}`}>
-                          {format(day, "d")}
-                        </div>
-                        <div className="flex flex-col gap-1 mt-2">
-                          {dayEvents.map(e => (
-                            <div 
-                              key={e.id} 
-                              className="px-2 py-1 rounded-md text-[11px] font-medium truncate flex items-center gap-1.5 border border-white/5 transition-opacity hover:opacity-80"
-                              style={{ backgroundColor: `${e.color}15`, color: e.color }}
-                            >
-                              <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: e.color }}></div>
-                              <span className="truncate">{e.title}</span>
-                            </div>
-                          ))}
-                        </div>
+              {/* View Content */}
+              {view !== "List" ? (
+                <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+                  {/* Days of Week */}
+                  <div className="grid grid-cols-7 border-b border-white/5">
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+                      <div key={day} className="py-3 text-center text-xs font-semibold tracking-wider text-white/40 uppercase">
+                        {day}
                       </div>
-                    )
-                  })}
+                    ))}
+                  </div>
+                  
+                  {/* Dates */}
+                  <div className={`grid grid-cols-7 ${view === "Week" ? "flex-1 min-h-[400px]" : ""}`}>
+                    {displayDays.map((day, idx) => {
+                      const isCurrentMonth = isSameMonth(day, currentDate)
+                      const isSelected = isSameDay(day, selectedDate)
+                      const dayEvents = events.filter(e => isSameDay(e.date, day))
+                      
+                      return (
+                        <div 
+                          key={day.toISOString()}
+                          onClick={() => setSelectedDate(day)}
+                          className={`min-h-[120px] p-2 border-r border-b border-white/5 cursor-pointer transition-colors ${
+                            (!isCurrentMonth && view === "Month") ? "bg-[#050505]/50 text-white/20" : "hover:bg-white/[0.02]"
+                          } ${isSelected ? "ring-1 ring-inset ring-[#3b82f6]/50 bg-[#3b82f6]/[0.02]" : ""}`}
+                        >
+                          <div className={`text-sm font-medium mb-1 ${isToday(day) ? "text-[#3b82f6]" : ((isCurrentMonth || view === "Week") ? "text-white/60" : "text-white/20")}`}>
+                            {format(day, "d")}
+                          </div>
+                          <div className="flex flex-col gap-1 mt-2">
+                            {dayEvents.map(e => (
+                              <div 
+                                key={e.id} 
+                                className="px-2 py-1 rounded-md text-[11px] font-medium truncate flex items-center gap-1.5 border border-white/5 transition-opacity hover:opacity-80"
+                                style={{ backgroundColor: `${e.color}15`, color: e.color }}
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: e.color }}></div>
+                                <span className="truncate">{e.title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 gap-6">
+                  {(() => {
+                    const monthEvents = events.filter(e => e.date >= monthStart && e.date <= monthEnd);
+                    if (monthEvents.length === 0) return <div className="text-white/40 text-sm text-center py-10">No events this month.</div>
+                    
+                    // Group by date
+                    const groups: Record<string, typeof monthEvents> = {};
+                    monthEvents.forEach(e => {
+                      const d = format(e.date, "yyyy-MM-dd");
+                      if (!groups[d]) groups[d] = [];
+                      groups[d].push(e);
+                    });
+                    
+                    return Object.entries(groups).map(([dateStr, dateEvents]) => {
+                      const dateObj = new Date(dateStr);
+                      return (
+                        <div key={dateStr} className="flex gap-6">
+                          <div className="w-16 flex-shrink-0 text-right">
+                            <div className="text-xs font-semibold tracking-wider text-white/40 uppercase">{format(dateObj, "EEE")}</div>
+                            <div className={`text-xl font-medium ${isToday(dateObj) ? "text-[#3b82f6]" : "text-white/90"}`}>{format(dateObj, "d")}</div>
+                          </div>
+                          <div className="flex-1 flex flex-col gap-3 pt-1 border-l border-white/5 pl-6 pb-6">
+                            {dateEvents.map(e => (
+                              <div key={e.id} onClick={() => setSelectedDate(e.date)} className="bg-[#121214] border border-white/5 rounded-xl p-4 flex flex-col gap-3 relative overflow-hidden group cursor-pointer hover:bg-white/[0.04] transition-colors">
+                                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: e.color }}></div>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.color }}></div>
+                                    <h4 className="font-medium text-white/90">{e.title}</h4>
+                                  </div>
+                                  <div className="text-xs text-white/40 pl-4">{e.type}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </div>
