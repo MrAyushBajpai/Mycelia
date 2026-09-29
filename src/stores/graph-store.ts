@@ -54,7 +54,10 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
-  selectNode: (id) => set({ selectedNodeId: id }),
+  selectNode: (id) => set((state) => ({ 
+    selectedNodeId: id,
+    nodes: state.nodes.map(n => ({ ...n, selected: n.id === id }))
+  })),
 
   deleteNode: (id) => {
     const { nodes, edges, selectedNodeId } = get()
