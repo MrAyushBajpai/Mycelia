@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import * as React from "react"
+import { useState, useEffect } from "react"
 import { X, Trash2, Send } from "lucide-react"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore } from "@/stores/interaction-store"
@@ -24,6 +25,12 @@ export function ContactDetail() {
   const [logDate, setLogDate] = useState("")
   const [newDateLabel, setNewDateLabel] = useState("")
   const [newDateValue, setNewDateValue] = useState("")
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  // Reset confirmation state when node changes
+  React.useEffect(() => {
+    setConfirmDelete(false)
+  }, [selectedNodeId])
 
   if (!node || node.type === "cluster") return null
 
@@ -257,10 +264,23 @@ export function ContactDetail() {
         </Section>
       </div>
 
-      <Button variant="ghost" size="sm" className="w-full mt-6 text-white/30 hover:text-destructive hover:bg-destructive/10" onClick={() => deleteNode(node.id)}>
-        <Trash2 size={13} data-icon="inline-start" />
-        Remove Person
-      </Button>
+      {!confirmDelete ? (
+        <Button variant="ghost" size="sm" className="w-full mt-6 text-white/30 hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => setConfirmDelete(true)}>
+          <Trash2 size={13} data-icon="inline-start" />
+          Remove Person
+        </Button>
+      ) : (
+        <div className="mt-6 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200">
+          <p className="text-sm font-medium text-destructive">Remove {String(data.label)}?</p>
+          <p className="text-xs text-white/60 leading-relaxed mb-1">
+            This will remove {String(data.label)} and their relationship connections from your graph.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" className="flex-1 h-8 text-xs hover:bg-white/5" onClick={() => setConfirmDelete(false)}>Cancel</Button>
+            <Button variant="destructive" size="sm" className="flex-1 h-8 text-xs" onClick={() => deleteNode(node.id)}>Remove</Button>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }
