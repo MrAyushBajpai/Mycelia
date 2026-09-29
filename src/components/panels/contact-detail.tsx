@@ -99,7 +99,7 @@ export function ContactDetail() {
   }
 
   return (
-    <aside className="absolute right-3 top-3 bottom-3 w-[calc(100vw-24px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] p-5 z-10 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
+    <aside className="absolute right-3 top-3 bottom-3 w-[calc(100vw-24px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-gradient-to-b from-white/[0.06] to-white/[0.02] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.04)] p-5 z-40 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center text-sm font-semibold text-white/50 uppercase">

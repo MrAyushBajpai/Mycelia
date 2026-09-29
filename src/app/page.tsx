@@ -44,7 +44,7 @@ export default function Home() {
     <ReactFlowProvider>
       <main className="relative flex-1">
         {/* Branding */}
-        <div className="absolute top-5 left-6 z-10 flex items-center gap-2.5 select-none">
+        <div className="absolute top-5 left-6 z-40 flex items-center gap-2.5 select-none">
           <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 flex items-center justify-center">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
               <circle cx="12" cy="12" r="2" />
