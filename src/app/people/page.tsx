@@ -133,15 +133,15 @@ export default function PeoplePage() {
             </div>
             
             <div className="flex items-center relative group">
-              <Button variant="outline" className="bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white rounded-lg h-9 gap-2 w-40 justify-start">
+              <Button variant="outline" className="bg-transparent border-white/10 text-white/70 hover:bg-white/5 hover:text-white rounded-lg h-9 gap-2">
                 <ArrowUpDown size={14} /> 
                 {sortBy === "urgency" && "Sort: Urgency"}
-                {sortBy === "recent" && "Sort: Recent"}
+                {sortBy === "recent" && "Sort: Recent Interaction"}
                 {sortBy === "alpha" && "Sort: A-Z"}
               </Button>
               
               {/* Sort Dropdown */}
-              <div className="absolute right-0 top-10 w-40 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 py-1">
+              <div className="absolute right-0 top-10 w-48 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 py-1">
                 <div 
                   className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "urgency" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
                   onClick={() => setSortBy("urgency")}
@@ -152,7 +152,7 @@ export default function PeoplePage() {
                   className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "recent" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
                   onClick={() => setSortBy("recent")}
                 >
-                  <Clock size={14} /> Most Recent
+                  <Clock size={14} /> Recent Interaction
                 </div>
                 <div 
                   className={`px-3 py-2 text-xs flex items-center gap-2 cursor-pointer transition-colors ${sortBy === "alpha" ? "text-primary bg-primary/10" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
