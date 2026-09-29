@@ -200,6 +200,7 @@ export function ContactDetail() {
           <form onSubmit={handleLog} className="flex flex-col gap-1.5 mb-3">
             <div className="flex gap-1.5">
               <Input
+                id="interaction-input"
                 value={logInput}
                 onChange={(e) => setLogInput(e.target.value)}
                 placeholder="Log an interaction..."
@@ -220,7 +221,21 @@ export function ContactDetail() {
             />
           </form>
           {interactions.length === 0 ? (
-            <p className="text-muted-foreground/50 italic text-xs">No interactions logged yet.</p>
+            <div className="flex flex-col items-center justify-center py-5 text-center bg-white/[0.02] border border-white/5 rounded-lg mt-2">
+              <p className="text-[13px] font-medium text-white/80">No interactions yet</p>
+              <p className="text-[11px] text-white/40 mt-1 mb-3">Keep your relationship history here.</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-7 text-[11px] bg-transparent border-white/10 hover:bg-white/10 text-white/70"
+                onClick={(e) => {
+                  e.preventDefault()
+                  document.getElementById("interaction-input")?.focus()
+                }}
+              >
+                Log first interaction
+              </Button>
+            </div>
           ) : (
             <div className="space-y-1 mt-3">
               {interactions.slice(0, 5).map((i) => (
@@ -258,8 +273,12 @@ export function ContactDetail() {
           <textarea
             value={(data.notes as string) || ""}
             onChange={(e) => updateField("notes", e.target.value)}
-            placeholder="Add background context..."
-            className="w-full bg-black/10 border border-white/5 rounded-lg p-2.5 text-[13px] font-normal min-h-[80px] outline-none focus:border-primary/30 transition-colors resize-y placeholder:text-muted-foreground/30"
+            placeholder="Add a note..."
+            className="w-full bg-transparent border border-transparent hover:bg-white/[0.03] hover:border-white/5 rounded-lg p-2 -ml-2 text-[13px] font-normal min-h-[60px] outline-none focus:bg-black/20 focus:border-primary/30 transition-all resize-none overflow-hidden placeholder:text-white/20"
+            onInput={(e) => {
+              e.currentTarget.style.height = 'auto';
+              e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px';
+            }}
           />
         </Section>
       </div>
