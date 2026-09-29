@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useMemo } from "react"
 import {
   ReactFlow,
   Controls,
@@ -60,12 +60,43 @@ function DynamicBackground() {
 }
 
 export function GraphCanvas() {
-  const { nodes, edges, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
+  const { nodes, edges, selectedNodeId, onNodesChange, onEdgesChange, selectNode } = useGraphStore()
   const [pendingConnection, setPendingConnection] = useState<Connection | null>(null)
 
   const handleConnect = useCallback((connection: Connection) => {
     setPendingConnection(connection)
   }, [])
+
+  const activeEdges = useMemo(() => {
+    return edges.map((e) => {
+      const isConnected = selectedNodeId && (e.source === selectedNodeId || e.target === selectedNodeId)
+      const isFaded = selectedNodeId && !isConnected
+
+      return {
+        ...e,
+        animated: isConnected ? true : false,
+        style: {
+          ...e.style,
+          strokeWidth: isConnected ? 2 : 1.5,
+          stroke: isConnected 
+            ? "rgba(0, 200, 255, 0.4)" 
+            : isFaded 
+              ? "rgba(255, 255, 255, 0.05)" 
+              : "rgba(255, 255, 255, 0.25)",
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 16,
+          height: 16,
+          color: isConnected 
+            ? "rgba(0, 200, 255, 0.4)" 
+            : isFaded 
+              ? "rgba(255, 255, 255, 0.05)" 
+              : "rgba(255, 255, 255, 0.4)",
+        }
+      }
+    })
+  }, [edges, selectedNodeId])
 
   return (
     <div className="h-screen w-full relative">
@@ -73,7 +104,7 @@ export function GraphCanvas() {
       <div className="absolute inset-0 z-10">
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={activeEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={handleConnect}
