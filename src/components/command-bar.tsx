@@ -154,10 +154,11 @@ export function CommandBar() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-xl top-[20%] p-0 gap-0 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] bg-white/5 backdrop-blur-3xl overflow-hidden rounded-2xl [&>button]:hidden">
         <DialogTitle className="sr-only">Command Bar</DialogTitle>
-        <form onSubmit={handleSubmit} className="relative flex flex-col">
+        <form onSubmit={handleSubmit} className="relative flex flex-col" autoComplete="off" data-bwignore data-1p-ignore data-lpignore="true">
           <div className="relative p-6">
             {/* The transparent input taking the actual keystrokes */}
             <input
+              type="search"
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
