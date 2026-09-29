@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { GraphCanvas } from "@/components/graph/graph-canvas"
 import { ContactDetail } from "@/components/panels/contact-detail"
+import { Toolbar } from "@/components/toolbar"
 import { useGraphStore } from "@/stores/graph-store"
 
 const SEED_NODES = [
@@ -39,6 +40,7 @@ export default function Home() {
 
   return (
     <main className="relative flex-1">
+      <Toolbar />
       <GraphCanvas />
       <ContactDetail />
     </main>
