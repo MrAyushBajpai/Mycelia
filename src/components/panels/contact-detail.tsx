@@ -99,7 +99,7 @@ export function ContactDetail() {
   }
 
   return (
-    <aside className="absolute right-0 top-0 h-screen w-80 border-l bg-card p-5 shadow-lg z-10 flex flex-col overflow-y-auto">
+    <aside className="absolute right-2 top-2 bottom-2 w-[calc(100vw-16px)] sm:right-4 sm:top-4 sm:bottom-4 sm:w-80 rounded-2xl bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 z-10 flex flex-col overflow-y-auto text-white/90 animate-in slide-in-from-right-8 duration-500 ease-out">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">{String(data.label)}</h2>
         <button onClick={() => selectNode(null)} className="text-muted-foreground hover:text-foreground">

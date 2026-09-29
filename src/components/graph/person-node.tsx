@@ -29,17 +29,18 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
   return (
     <div
       className={cn(
-        "rounded-xl border bg-card px-4 py-3 shadow-sm transition-shadow relative",
-        selected && "ring-2 ring-primary shadow-md",
-        isOverdue && "border-amber-500/50 bg-amber-500/5"
+        "rounded-full border px-5 py-2.5 transition-all duration-300 relative animate-in zoom-in-95 duration-500 fade-in",
+        "bg-black/60 backdrop-blur-md border-white/10 text-white/90 shadow-xl",
+        selected ? "ring-2 ring-primary shadow-[0_0_20px_rgba(0,240,255,0.4)] border-primary scale-105" : "hover:border-white/30 hover:scale-105",
+        isOverdue && "border-destructive shadow-[0_0_15px_rgba(255,85,0,0.3)] ring-destructive"
       )}
     >
       {isOverdue && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full animate-pulse shadow-[0_0_10px_rgba(255,85,0,0.8)]" />
       )}
-      <Handle type="target" position={Position.Left} className="!bg-muted-foreground !w-2 !h-2" />
-      <div className="text-sm font-medium">{d.label}</div>
-      <Handle type="source" position={Position.Right} className="!bg-muted-foreground !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-2 !h-2" />
+      <div className="text-sm font-medium tracking-wide">{d.label}</div>
+      <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-2 !h-2" />
     </div>
   )
 }

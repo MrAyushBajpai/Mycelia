@@ -152,37 +152,37 @@ export function CommandBar() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-xl top-[20%] p-0 gap-0 border-0 shadow-2xl [&>button]:hidden">
+      <DialogContent className="sm:max-w-xl top-[20%] p-0 gap-0 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] bg-white/5 backdrop-blur-3xl overflow-hidden rounded-2xl [&>button]:hidden">
         <DialogTitle className="sr-only">Command Bar</DialogTitle>
         <form onSubmit={handleSubmit} className="relative flex flex-col">
-          <div className="relative p-4">
+          <div className="relative p-6">
             {/* The transparent input taking the actual keystrokes */}
             <input
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Log interaction... e.g. 'Coffee with @Alex on 2024-05-12'"
-              className="w-full text-lg bg-transparent outline-none z-10 relative placeholder:text-muted-foreground/50 caret-primary text-transparent"
+              placeholder="Log interaction... e.g. 'Coffee with @Alex on friday'"
+              className="w-full text-xl bg-transparent outline-none z-10 relative placeholder:text-white/20 caret-primary text-transparent"
               spellCheck={false}
               maxLength={2000}
             />
             {/* The styled overlay sitting perfectly beneath the text */}
-            <div className="absolute top-4 left-4 right-4 text-lg pointer-events-none whitespace-pre-wrap break-words" aria-hidden="true">
+            <div className="absolute top-6 left-6 right-6 text-xl pointer-events-none whitespace-pre-wrap break-words text-white" aria-hidden="true">
               {!input ? null : renderedText}
             </div>
           </div>
           
           {input && (
-            <div className="border-t bg-muted/30 p-3 text-xs flex gap-4 text-muted-foreground">
+            <div className="border-t border-white/10 bg-white/5 p-4 text-xs flex gap-6 text-white/50">
               <div>
-                <span className="font-semibold text-foreground">Linking to: </span>
+                <span className="font-semibold text-white/80">Linking to: </span>
                 {matchedNodes.size > 0 
-                  ? Array.from(matchedNodes).map(id => useGraphStore.getState().nodes.find(n => n.id === id)?.data.label).join(", ")
+                  ? <span className="text-primary">{Array.from(matchedNodes).map(id => useGraphStore.getState().nodes.find(n => n.id === id)?.data.label).join(", ")}</span>
                   : "None (type @name)"}
               </div>
               <div>
-                <span className="font-semibold text-foreground">Date: </span>
-                {parsedDate}
+                <span className="font-semibold text-white/80">Date: </span>
+                <span className="text-amber-500">{parsedDate}</span>
               </div>
             </div>
           )}

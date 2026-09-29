@@ -40,37 +40,39 @@ export function Toolbar() {
 
   return (
     <>
-      <div className="absolute top-4 left-4 z-10 flex gap-2 items-start">
-        <Button variant="outline" size="sm" onClick={() => setPersonOpen(true)}>
-          <User size={14} data-icon="inline-start" />
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2 items-center p-2 rounded-full bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-5 duration-700">
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setPersonOpen(true)}>
+          <User size={14} className="mr-1.5" />
           Add Person
         </Button>
-        <Button variant="outline" size="sm" onClick={() => setClusterOpen(true)}>
-          <Users size={14} data-icon="inline-start" />
+        <div className="w-px h-4 bg-white/10" />
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90" onClick={() => setClusterOpen(true)}>
+          <Users size={14} className="mr-1.5" />
           Add Circle
         </Button>
 
+        <div className="w-px h-4 bg-white/10" />
         <div className="relative">
-          <div className="flex items-center gap-1.5 bg-card border rounded-md px-2.5 h-8">
-            <Search size={14} className="text-muted-foreground" />
+          <div className="flex items-center gap-1.5 px-3 h-8 rounded-full hover:bg-white/5 transition-colors">
+            <Search size={14} className="text-white/50" />
             <input
               value={query}
               onChange={(e) => { setQuery(e.target.value); setShowResults(true) }}
               onFocus={() => setShowResults(true)}
               onBlur={() => setTimeout(() => setShowResults(false), 150)}
               placeholder="Search..."
-              className="bg-transparent text-sm outline-none w-36"
+              className="bg-transparent text-sm text-white/90 outline-none w-36 placeholder:text-white/30"
             />
           </div>
           {showResults && results.length > 0 && (
-            <div className="absolute top-9 left-0 w-full bg-card border rounded-md shadow-md overflow-hidden">
+            <div className="absolute bottom-12 left-0 w-full bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden p-1">
               {results.map((n) => (
                 <button
                   key={n.id}
-                  className="w-full px-3 py-2 text-sm text-left hover:bg-muted flex items-center gap-2"
+                  className="w-full px-3 py-2 text-sm text-left hover:bg-white/10 rounded-lg flex items-center gap-2 text-white/80 transition-colors"
                   onMouseDown={() => focusNode(n.id)}
                 >
-                  {n.type === "cluster" ? <Users size={12} /> : <User size={12} />}
+                  {n.type === "cluster" ? <Users size={12} className="text-primary" /> : <User size={12} className="text-white/40" />}
                   {String((n.data as Record<string, unknown>).label)}
                 </button>
               ))}

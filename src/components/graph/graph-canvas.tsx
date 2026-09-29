@@ -23,8 +23,10 @@ const nodeTypes: NodeTypes = {
 }
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16 },
-  style: { strokeWidth: 1.5 },
+  type: "smoothstep",
+  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.3)" },
+  style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.15)" },
+  animated: true,
 }
 
 export function GraphCanvas() {
@@ -51,7 +53,7 @@ export function GraphCanvas() {
         fitView
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={20} size={1} />
+        <Background gap={24} size={1.5} color="rgba(255, 255, 255, 0.08)" />
         <Controls showInteractive={false} />
       </ReactFlow>
 
