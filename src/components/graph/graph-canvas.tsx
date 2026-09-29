@@ -98,12 +98,37 @@ export function GraphCanvas() {
     })
   }, [edges, selectedNodeId])
 
+  const activeNodes = useMemo(() => {
+    if (!selectedNodeId) return nodes
+
+    const connectedIds = new Set<string>()
+    connectedIds.add(selectedNodeId)
+    edges.forEach(e => {
+      if (e.source === selectedNodeId) connectedIds.add(e.target)
+      if (e.target === selectedNodeId) connectedIds.add(e.source)
+    })
+
+    return nodes.map((n) => {
+      const isSelected = n.id === selectedNodeId
+      const isConnected = connectedIds.has(n.id)
+      
+      return {
+        ...n,
+        style: {
+          ...n.style,
+          opacity: isSelected ? 1 : isConnected ? 0.85 : 0.4,
+          transition: "opacity 0.3s ease",
+        }
+      }
+    })
+  }, [nodes, edges, selectedNodeId])
+
   return (
     <div className="h-screen w-full relative">
       <DynamicBackground />
       <div className="absolute inset-0 z-10">
         <ReactFlow
-          nodes={nodes}
+          nodes={activeNodes}
           edges={activeEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
