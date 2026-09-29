@@ -47,14 +47,14 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
       {isOverdue && (
         <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
       )}
-      <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-2 !h-2" />
+      <Handle type="target" position={Position.Left} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
       <div className="flex items-center gap-2">
         <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase">
           {d.label.charAt(0)}
         </div>
         <span className="text-sm font-medium tracking-wide">{d.label}</span>
       </div>
-      <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-2 !h-2" />
+      <Handle type="source" position={Position.Right} className="!bg-[#09090b] !border-[1.5px] !border-white/20 !w-2.5 !h-2.5 transition-colors hover:!bg-white/30" />
     </div>
   )
 }

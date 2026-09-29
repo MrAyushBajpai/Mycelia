@@ -29,14 +29,24 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
           : 'none',
       }}
     >
-      <Handle type="target" position={Position.Left} className="!bg-transparent !border-none !w-0 !h-0" />
+      <Handle 
+        type="target" 
+        position={Position.Left} 
+        className="!bg-[#09090b] !border-[1.5px] !w-2.5 !h-2.5 transition-colors hover:!bg-white/30"
+        style={{ borderColor: color }}
+      />
       <div 
         className="text-xs font-bold uppercase tracking-[0.2em]" 
         style={{ color }}
       >
         {d.label}
       </div>
-      <Handle type="source" position={Position.Right} className="!bg-transparent !border-none !w-0 !h-0" />
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        className="!bg-[#09090b] !border-[1.5px] !w-2.5 !h-2.5 transition-colors hover:!bg-white/30"
+        style={{ borderColor: color }}
+      />
     </div>
   )
 }
