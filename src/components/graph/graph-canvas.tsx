@@ -25,7 +25,7 @@ const nodeTypes: NodeTypes = {
 
 // Increased contrast for edges so they are visible
 const defaultEdgeOptions: DefaultEdgeOptions = {
-  type: "smoothstep",
+  type: "default",
   markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.4)" },
   style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.25)" },
   labelStyle: { fill: "rgba(255, 255, 255, 0.6)", fontSize: 10, fontWeight: 500, letterSpacing: "0.05em" },
@@ -71,6 +71,7 @@ export function GraphCanvas() {
   const now = useTimeStore((s) => s.now)
 
   const [pendingConnection, setPendingConnection] = useState<Connection | null>(null)
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
 
   useEffect(() => {
     syncGraph(nodes, now)
@@ -80,10 +81,12 @@ export function GraphCanvas() {
     setPendingConnection(connection)
   }, [])
 
+  const focusId = hoveredNodeId || selectedNodeId
+
   const activeEdges = useMemo(() => {
     return edges.map((e) => {
-      const isConnected = selectedNodeId && (e.source === selectedNodeId || e.target === selectedNodeId)
-      const isFaded = selectedNodeId && !isConnected
+      const isConnected = focusId && (e.source === focusId || e.target === focusId)
+      const isFaded = focusId && !isConnected
 
       return {
         ...e,
@@ -106,35 +109,45 @@ export function GraphCanvas() {
             : isFaded 
               ? "rgba(255, 255, 255, 0.05)" 
               : "rgba(255, 255, 255, 0.4)",
-        }
+        },
+        labelStyle: { 
+          fill: isFaded ? "rgba(255, 255, 255, 0.15)" : isConnected ? "rgba(0, 200, 255, 0.9)" : "rgba(255, 255, 255, 0.6)", 
+          fontSize: 10, 
+          fontWeight: 500, 
+          letterSpacing: "0.05em" 
+        },
+        labelBgStyle: { 
+          fill: "#09090b", 
+          fillOpacity: isFaded ? 0.4 : 0.9 
+        },
       }
     })
-  }, [edges, selectedNodeId])
+  }, [edges, focusId])
 
   const activeNodes = useMemo(() => {
-    if (!selectedNodeId) return nodes
+    if (!focusId) return nodes
 
     const connectedIds = new Set<string>()
-    connectedIds.add(selectedNodeId)
+    connectedIds.add(focusId)
     edges.forEach(e => {
-      if (e.source === selectedNodeId) connectedIds.add(e.target)
-      if (e.target === selectedNodeId) connectedIds.add(e.source)
+      if (e.source === focusId) connectedIds.add(e.target)
+      if (e.target === focusId) connectedIds.add(e.source)
     })
 
     return nodes.map((n) => {
-      const isSelected = n.id === selectedNodeId
+      const isSelected = n.id === focusId || n.id === selectedNodeId
       const isConnected = connectedIds.has(n.id)
       
       return {
         ...n,
         style: {
           ...n.style,
-          opacity: isSelected ? 1 : isConnected ? 0.85 : 0.4,
+          opacity: isSelected ? 1 : isConnected ? 0.85 : 0.25,
           transition: "opacity 0.3s ease",
         }
       }
     })
-  }, [nodes, edges, selectedNodeId])
+  }, [nodes, edges, focusId, selectedNodeId])
 
   return (
     <div className="h-screen w-full relative">
@@ -147,6 +160,8 @@ export function GraphCanvas() {
           onEdgesChange={onEdgesChange}
           onConnect={handleConnect}
           onNodeClick={(_, node) => selectNode(node.id)}
+          onNodeMouseEnter={(_, node) => setHoveredNodeId(node.id)}
+          onNodeMouseLeave={() => setHoveredNodeId(null)}
           onPaneClick={() => selectNode(null)}
           nodeTypes={nodeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
