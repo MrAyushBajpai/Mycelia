@@ -79,8 +79,8 @@ export function Toolbar() {
         </div>
       </div>
 
-      <AddPersonDialog open={personOpen} onOpenChange={setPersonOpen} />
-      <AddClusterDialog open={clusterOpen} onOpenChange={setClusterOpen} />
+      {personOpen && <AddPersonDialog open={personOpen} onOpenChange={setPersonOpen} />}
+      {clusterOpen && <AddClusterDialog open={clusterOpen} onOpenChange={setClusterOpen} />}
     </>
   )
 }

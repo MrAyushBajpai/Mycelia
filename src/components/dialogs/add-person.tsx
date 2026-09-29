@@ -20,8 +20,10 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
   const setNodes = useGraphStore((s) => s.setNodes)
   const setEdges = useGraphStore((s) => s.setEdges)
 
-  // Only subscribe to clusters to populate the dropdown
-  const clusters = useGraphStore((s) => s.nodes.filter(n => n.type === "cluster"))
+  // Subscribe to nodes, but we'll conditionally mount this dialog in Toolbar 
+  // so it doesn't re-render 60fps while dragging.
+  const nodes = useGraphStore((s) => s.nodes)
+  const clusters = nodes.filter(n => n.type === "cluster")
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

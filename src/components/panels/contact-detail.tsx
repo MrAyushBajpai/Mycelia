@@ -7,6 +7,8 @@ import { useInteractionStore } from "@/stores/interaction-store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
+const EMPTY_ARRAY: any[] = []
+
 export function ContactDetail() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId)
   const node = useGraphStore((s) => s.nodes.find((n) => n.id === selectedNodeId))
@@ -18,7 +20,7 @@ export function ContactDetail() {
   // doesn't cause a re-render loop via getConnections.
   const edges = useGraphStore((s) => s.edges)
   
-  const interactions = useInteractionStore((s) => s.interactionsByContact[node?.id || ""] || [])
+  const interactions = useInteractionStore((s) => s.interactionsByContact[node?.id || ""] || EMPTY_ARRAY)
   const addInteraction = useInteractionStore((s) => s.addInteraction)
 
   const [logInput, setLogInput] = useState("")
