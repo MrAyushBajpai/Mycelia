@@ -1,16 +1,18 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, User, Users } from "lucide-react"
+import { Search, User, Users, UploadCloud } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AddPersonDialog } from "@/components/dialogs/add-person"
 import { AddClusterDialog } from "@/components/dialogs/add-cluster"
+import { ImportCsvDialog } from "@/components/dialogs/import-csv"
 import { useGraphStore } from "@/stores/graph-store"
 import { useReactFlow } from "@xyflow/react"
 
 export function Toolbar() {
   const [personOpen, setPersonOpen] = useState(false)
   const [clusterOpen, setClusterOpen] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [showResults, setShowResults] = useState(false)
 
@@ -50,6 +52,10 @@ export function Toolbar() {
           <Users size={14} className="mr-1.5" />
           Add Circle
         </Button>
+        <div className="w-px h-4 bg-white/10" />
+        <Button variant="ghost" size="icon-sm" className="rounded-full w-8 h-8 hover:bg-white/10 text-white/70 hover:text-white flex items-center justify-center" onClick={() => setImportOpen(true)} title="Import CSV">
+          <UploadCloud size={14} />
+        </Button>
 
         <div className="w-px h-4 bg-white/10" />
         <div className="relative">
@@ -83,6 +89,7 @@ export function Toolbar() {
 
       {personOpen && <AddPersonDialog open={personOpen} onOpenChange={setPersonOpen} />}
       {clusterOpen && <AddClusterDialog open={clusterOpen} onOpenChange={setClusterOpen} />}
+      {importOpen && <ImportCsvDialog open={importOpen} onOpenChange={setImportOpen} />}
     </>
   )
 }
