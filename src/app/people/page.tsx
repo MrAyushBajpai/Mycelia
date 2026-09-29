@@ -150,34 +150,44 @@ export default function PeoplePage() {
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
-                      {personConnections.map(c => (
-                        <span key={c.id} className="px-2 py-0.5 rounded-md bg-white/5 text-white/50 text-[11px] border border-white/5">
+                      {personConnections.slice(0, 2).map(c => (
+                        <span key={c.id} className="px-2 py-0.5 rounded-md bg-white/5 text-white/50 text-[11px] border border-white/5 whitespace-nowrap">
                           {c.label}
                         </span>
                       ))}
+                      {personConnections.length > 2 && (
+                        <span className="px-2 py-0.5 rounded-md bg-white/5 text-white/40 text-[11px] border border-white/5 whitespace-nowrap">
+                          +{personConnections.length - 2}
+                        </span>
+                      )}
                       {personConnections.length === 0 && <span className="text-white/20">-</span>}
                     </div>
 
-                    <div className="text-white/60">
+                    <div className="text-white/60 truncate">
                       {lastContactStr}
                     </div>
 
-                    <div className={`font-medium ${isOverdue ? "text-[#ea580c]" : "text-white/60"}`}>
+                    <div className={`font-medium truncate ${isOverdue ? "text-[#ea580c]" : "text-white/60"}`}>
                       {nextFollowUpStr}
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
-                      {circleConnections.map(c => {
+                      {circleConnections.slice(0, 2).map(c => {
                         const target = nodes.find(n => n.id === c.target)
                         if (!target) return null
                         const color = (target.data as any).color || "#ffffff"
                         return (
-                          <span key={c.id} className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 text-white/80 text-[11px] border border-white/5">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-                            {String((target.data as any).label)}
+                          <span key={c.id} className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 text-white/80 text-[11px] border border-white/5 whitespace-nowrap">
+                            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                            <span className="truncate max-w-[100px]">{String((target.data as any).label)}</span>
                           </span>
                         )
                       })}
+                      {circleConnections.length > 2 && (
+                        <span className="px-2 py-0.5 rounded-md bg-white/5 text-white/40 text-[11px] border border-white/5 whitespace-nowrap">
+                          +{circleConnections.length - 2}
+                        </span>
+                      )}
                       {circleConnections.length === 0 && <span className="text-white/20">-</span>}
                     </div>
 
