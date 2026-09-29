@@ -43,3 +43,4 @@ export const PersonNode = memo(function PersonNode({ data, selected }: NodeProps
   )
 }
 
+)

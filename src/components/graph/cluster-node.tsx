@@ -29,3 +29,4 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
     </div>
   )
 }
+)
