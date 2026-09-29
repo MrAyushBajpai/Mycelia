@@ -87,10 +87,31 @@ export default function CalendarPage() {
   
   const displayDays = view === "Week" ? weekDays : calendarDays
   
-  const selectedEvents = events.filter(e => isSameDay(e.date, selectedDate))
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [selectedCircle, setSelectedCircle] = useState<string | null>(null)
+  
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false)
+  const [circleDropdownOpen, setCircleDropdownOpen] = useState(false)
+
+  const eventTypes = useMemo(() => Array.from(new Set(events.map(e => e.type))), [events])
+  const circles = useMemo(() => nodes.filter(n => n.type === "cluster"), [nodes])
+
+  const filteredEvents = useMemo(() => {
+    return events.filter(e => {
+      if (selectedType && e.type !== selectedType) return false
+      if (selectedCircle) {
+        const pId = e.people[0]?.id
+        const inCircle = edges.some(edge => edge.source === pId && edge.target === selectedCircle)
+        if (!inCircle) return false
+      }
+      return true
+    })
+  }, [events, selectedType, selectedCircle, edges])
+
+  const selectedEvents = filteredEvents.filter(e => isSameDay(e.date, selectedDate))
   
   const today = new Date()
-  const upcomingEvents = events.filter(e => {
+  const upcomingEvents = filteredEvents.filter(e => {
     const diff = differenceInDays(e.date, today)
     return diff >= -7 && diff <= 30
   }).slice(0, 5) // Show top 5 near events
@@ -148,15 +169,75 @@ export default function CalendarPage() {
                 </div>
 
                 {/* Filters */}
-                <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0c] border border-white/5 rounded-full text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors">
-                    <div className="w-2 h-2 rounded-full bg-[#8b5cf6]"></div>
-                    All Events <ChevronDown size={14} />
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0c] border border-white/5 rounded-full text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    Circles <ChevronDown size={14} />
-                  </button>
+                <div className="flex items-center gap-3 relative">
+                  {/* Events Dropdown */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}
+                      onBlur={() => setTimeout(() => setTypeDropdownOpen(false), 200)}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0c] border border-white/5 rounded-full text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: selectedType ? (events.find(e => e.type === selectedType)?.color || "#8b5cf6") : "#8b5cf6" }}></div>
+                      {selectedType || "All Events"} <ChevronDown size={14} />
+                    </button>
+                    
+                    {typeDropdownOpen && (
+                      <div className="absolute top-full mt-2 w-48 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 py-1">
+                        <button 
+                          onClick={() => setSelectedType(null)}
+                          className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                        >
+                          All Events
+                        </button>
+                        {eventTypes.map(t => {
+                          const eColor = events.find(e => e.type === t)?.color;
+                          return (
+                            <button 
+                              key={t as string}
+                              onClick={() => setSelectedType(t as string)}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                            >
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: eColor }}></div>
+                              {t as string}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Circles Dropdown */}
+                  <div className="relative">
+                    <button 
+                      onClick={() => setCircleDropdownOpen(!circleDropdownOpen)}
+                      onBlur={() => setTimeout(() => setCircleDropdownOpen(false), 200)}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#0a0a0c] border border-white/5 rounded-full text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                      {selectedCircle ? (nodes.find(n => n.id === selectedCircle)?.data.label as string) : "Circles"} <ChevronDown size={14} />
+                    </button>
+                    
+                    {circleDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-[#0a0a0c] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 py-1">
+                        <button 
+                          onClick={() => setSelectedCircle(null)}
+                          className="w-full text-left px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                        >
+                          All Circles
+                        </button>
+                        {circles.map(c => (
+                          <button 
+                            key={c.id}
+                            onClick={() => setSelectedCircle(c.id)}
+                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                          >
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: c.data.color as string }}></div>
+                            {c.data.label as string}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -177,7 +258,7 @@ export default function CalendarPage() {
                     {displayDays.map((day, idx) => {
                       const isCurrentMonth = isSameMonth(day, currentDate)
                       const isSelected = isSameDay(day, selectedDate)
-                      const dayEvents = events.filter(e => isSameDay(e.date, day))
+                      const dayEvents = filteredEvents.filter(e => isSameDay(e.date, day))
                       
                       return (
                         <div 
@@ -210,7 +291,7 @@ export default function CalendarPage() {
               ) : (
                 <div className="bg-[#0a0a0c] border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex flex-col p-6 gap-6">
                   {(() => {
-                    const monthEvents = events.filter(e => e.date >= monthStart && e.date <= monthEnd);
+                    const monthEvents = filteredEvents.filter(e => e.date >= monthStart && e.date <= monthEnd);
                     if (monthEvents.length === 0) return <div className="text-white/40 text-sm text-center py-10">No events this month.</div>
                     
                     // Group by date
