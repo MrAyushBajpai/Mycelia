@@ -1,17 +1,55 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const router = useRouter()
+  const supabase = createClient()
+  
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleAction = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    router.push("/")
+    setLoading(true)
+    setError(null)
+    
+    // ponytail: later derive E2EE key from password here before dropping it
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    
+    if (authError) {
+      setError(authError.message)
+      setLoading(false)
+    } else {
+      router.push("/")
+    }
+  }
+
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      setError("Email and password required")
+      return
+    }
+    setLoading(true)
+    setError(null)
+    
+    // ponytail: later generate E2EE keypair, encrypt private key with password derived key, store in DB
+    const { error: authError } = await supabase.auth.signUp({ email, password })
+    
+    if (authError) {
+      setError(authError.message)
+    } else {
+      setError("Check email for confirmation link (or login if auto-confirmed)")
+    }
+    setLoading(false)
   }
 
   return (
@@ -36,12 +74,14 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <form onSubmit={handleAction} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2.5">
             <Label htmlFor="email" className="text-[13px] text-white/50 pl-1 uppercase tracking-wider">Email</Label>
             <Input 
               id="email" 
               type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com" 
               required
               className="h-11 px-4 rounded-xl bg-white/[0.02] border-white/[0.06] text-white/90 placeholder:text-white/20 hover:bg-white/[0.04] transition-colors focus-visible:bg-white/[0.06] focus-visible:border-primary/40 focus-visible:ring-primary/20" 
@@ -57,18 +97,26 @@ export default function LoginPage() {
             </div>
             <Input 
               id="password" 
-              type="password" 
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••" 
               required
               className="h-11 px-4 rounded-xl bg-white/[0.02] border-white/[0.06] text-white/90 placeholder:text-white/20 hover:bg-white/[0.04] transition-colors focus-visible:bg-white/[0.06] focus-visible:border-primary/40 focus-visible:ring-primary/20" 
             />
           </div>
 
+          {error && (
+            <div className="text-[13px] text-destructive text-center font-medium bg-destructive/10 py-2 rounded-lg border border-destructive/20">
+              {error}
+            </div>
+          )}
+
           <div className="pt-4 flex flex-col gap-3">
-            <Button type="submit" className="w-full font-medium h-11 rounded-xl bg-primary/90 text-primary-foreground hover:bg-primary transition-colors shadow-[0_0_20px_rgba(0,240,255,0.15)]">
-              Enter Graph
+            <Button disabled={loading} type="submit" className="w-full font-medium h-11 rounded-xl bg-primary/90 text-primary-foreground hover:bg-primary transition-colors shadow-[0_0_20px_rgba(0,240,255,0.15)]">
+              {loading ? "Authenticating..." : "Enter Graph"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.push("/")} className="w-full font-medium h-11 rounded-xl border-white/[0.06] bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white/90 transition-colors">
+            <Button disabled={loading} type="button" variant="outline" onClick={handleSignUp} className="w-full font-medium h-11 rounded-xl border-white/[0.06] bg-transparent hover:bg-white/[0.04] text-white/60 hover:text-white/90 transition-colors">
               Create Account
             </Button>
           </div>
