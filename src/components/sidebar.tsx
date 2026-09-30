@@ -17,6 +17,8 @@ export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const pathname = usePathname()
 
+  if (pathname === "/login") return null;
+
   return (
     <>
       {/* Collapsed State: Button to open sidebar */}
