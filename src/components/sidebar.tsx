@@ -1,9 +1,11 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
-import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu, LogOut } from "lucide-react"
 import { useUIStore } from "@/stores/ui-store"
+import { createClient } from "@/lib/supabase/client"
 
 const NAV_ITEMS = [
   { name: "Graph", href: "/", icon: Network },
@@ -16,6 +18,20 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createClient()
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) setUserEmail(user.email)
+    })
+  }, [supabase.auth])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/login")
+  }
 
   if (pathname === "/login") return null;
 
@@ -86,16 +102,18 @@ export function Sidebar() {
         </div>
 
         {/* User Profile */}
-        <div className="p-4 mb-2">
-          <button className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/[0.04]">
+        <div className="p-4 mb-2 flex items-center gap-2">
+          <div className="flex items-center gap-3 p-2 rounded-xl border border-transparent flex-1 overflow-hidden">
             <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-white/90 font-medium text-sm">
-              N
+              {userEmail ? userEmail[0].toUpperCase() : "U"}
             </div>
             <div className="flex flex-col items-start flex-1 overflow-hidden">
-              <span className="text-sm font-medium text-white/90 truncate w-full text-left">Nadia</span>
+              <span className="text-sm font-medium text-white/90 truncate w-full text-left">{userEmail || "User"}</span>
               <span className="text-[11px] text-white/40 truncate w-full text-left">Personal Workspace</span>
             </div>
-            <ChevronsUpDown size={14} className="text-white/30 flex-shrink-0" />
+          </div>
+          <button onClick={handleSignOut} className="p-2 text-white/30 hover:text-white/90 hover:bg-white/5 rounded-lg transition-colors flex-shrink-0" title="Sign out">
+            <LogOut size={16} />
           </button>
         </div>
       </div>
