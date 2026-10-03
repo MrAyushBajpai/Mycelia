@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 
 export type Interaction = {
   id: string
@@ -11,7 +11,7 @@ export type Interaction = {
 type InteractionState = {
   interactionsByContact: Record<string, Interaction[]>
   setInteractions: (interactions: any[]) => void
-  addInteraction: (contactId: string, note: string, occurredAt?: string) => Promise<void>
+  addInteraction: (contactId: string, note: string, occurredAt?: string, userId?: string, getToken?: () => Promise<string | null>) => Promise<void>
   getByContact: (contactId: string) => Interaction[]
 }
 
@@ -34,10 +34,10 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
     set({ interactionsByContact: grouped })
   },
 
-  addInteraction: async (contactId, note, occurredAt) => {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+  addInteraction: async (contactId, note, occurredAt, userId, getToken) => {
+    if (!userId) return
+
+    const supabase = await createAuthenticatedClient(getToken || (async () => null))
 
     const occurred = occurredAt ? new Date(occurredAt).toISOString() : new Date().toISOString()
     
@@ -65,7 +65,7 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
 
     // Persist to DB
     const { data, error } = await supabase.from('interactions').insert({
-      user_id: user.id,
+      user_id: userId,
       contact_id: contactId,
       note,
       occurred_at: occurred

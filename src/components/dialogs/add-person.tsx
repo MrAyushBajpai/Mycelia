@@ -1,12 +1,13 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { useGraphStore } from "@/stores/graph-store"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 
 type Props = {
   open: boolean
@@ -14,12 +15,12 @@ type Props = {
 }
 
 export function AddPersonDialog({ open, onOpenChange }: Props) {
-  const supabase = createClient()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  const { userId, getToken } = useAuth()
   const setNodes = useGraphStore((s) => s.setNodes)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -28,9 +29,9 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
 
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!userId) return
 
+      const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
       const personId = crypto.randomUUID()
       const ui_x = Math.round(Math.random() * 400 + 100)
       const ui_y = Math.round(Math.random() * 300 + 50)
@@ -52,7 +53,7 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
       // 1. Save Person
       await supabase.from("contacts").insert({
         id: personId,
-        user_id: user.id,
+        user_id: userId,
         name: name.trim(),
         email: email || null,
         phone: phone || null,

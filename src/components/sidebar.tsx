@@ -1,12 +1,10 @@
-﻿"use client"
+"use client"
 
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { useEffect, useState } from "react"
-import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu, LogOut } from "lucide-react"
+import { Network, User, Users, Calendar, Settings, ChevronsLeft, Menu } from "lucide-react"
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs"
 import { useUIStore } from "@/stores/ui-store"
-import { createClient } from "@/lib/supabase/client"
 
 const NAV_ITEMS = [
   { name: "Graph", href: "/", icon: Network },
@@ -19,22 +17,8 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUIStore()
   const pathname = usePathname()
-  const router = useRouter()
-  const supabase = createClient()
-  const [userEmail, setUserEmail] = useState<string | null>(null)
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) setUserEmail(user.email)
-    })
-  }, [supabase.auth])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
-  }
-
-  
 
   return (
     <>

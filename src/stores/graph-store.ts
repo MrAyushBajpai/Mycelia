@@ -16,7 +16,7 @@ type GraphState = {
   selectedNodeId: string | null
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
-  onConnect: (connection: Connection, label?: string) => void
+  onConnect: (connection: Connection, label?: string, userId?: string, getToken?: () => Promise<string | null>) => void
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
@@ -99,10 +99,11 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }
   },
 
-  onConnect: async (connection, label?: string) => {
-    const supabase = (await import("@/lib/supabase/client")).createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+  onConnect: async (connection, label?: string, userId?: string, getToken?: () => Promise<string | null>) => {
+    if (!userId) return
+
+    const { createAuthenticatedClient } = await import("@/lib/supabase/client")
+    const supabase = await createAuthenticatedClient(getToken || (async () => null))
 
     // Find node types
     const sourceNode = get().nodes.find(n => n.id === connection.source)
@@ -122,8 +123,6 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
     // Insert to Supabase
     if (isContactCluster) {
-      // It's a contact_cluster relationship.
-      // If they drew cluster->person, we must map their visual source/target to contact/cluster.
       const isReversed = sourceNode?.type === "cluster"
       
       const { error } = await supabase.from("contact_clusters").upsert({
@@ -135,10 +134,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }, { onConflict: "contact_id,cluster_id" })
       if (error) console.error("Upsert contact_clusters error:", error)
     } else {
-      // It's a direct edge
       await supabase.from("edges").insert({
         id: edgeId,
-        user_id: user.id,
+        user_id: userId,
         source_id: connection.source,
         target_id: connection.target,
         source_handle: connection.sourceHandle,

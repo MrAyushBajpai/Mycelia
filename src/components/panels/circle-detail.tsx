@@ -1,8 +1,9 @@
 ﻿"use client"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 import { CLUSTER_COLORS } from "@/lib/constants"
 
 import { useState, useMemo } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore, Interaction } from "@/stores/interaction-store"
 import { X, Edit2, Plus } from "lucide-react"
@@ -11,7 +12,8 @@ import { formatDistanceToNow } from "date-fns"
 type Tab = "overview" | "members" | "activity"
 
 export function CircleDetail() {
-  const selectedNodeId = useGraphStore(s => s.selectedNodeId)
+  const { getToken } = useAuth()
+    const selectedNodeId = useGraphStore(s => s.selectedNodeId)
   const selectNode = useGraphStore(s => s.selectNode)
   const setNodes = useGraphStore(s => s.setNodes)
   const selectedNode = useGraphStore(s => s.nodes.find(n => n.id === s.selectedNodeId))
@@ -24,7 +26,7 @@ export function CircleDetail() {
     const currentNodes = useGraphStore.getState().nodes
     setNodes(currentNodes.map(n => n.id === selectedNodeId ? { ...n, data: { ...n.data, color: newColor } } : n))
     
-    const supabase = createClient()
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     const { error } = await supabase.from("clusters").update({ color: newColor }).eq("id", selectedNodeId)
     if (error) console.error("Failed to update color:", error)
   }
@@ -200,6 +202,7 @@ export function CircleDetail() {
     </div>
   )
 }
+
 
 
 
