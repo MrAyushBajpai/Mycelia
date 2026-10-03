@@ -8,17 +8,18 @@ import { GraphCanvas } from "@/components/graph/graph-canvas"
 import { ContactDetail } from "@/components/panels/contact-detail"
 import { Toolbar } from "@/components/toolbar"
 import { CommandBar } from "@/components/command-bar"
-import { useGraphStore } from "@/stores/graph-store"
 import { SearchBar } from "@/components/search-bar"
-import { SEED_NODES, SEED_EDGES } from "@/lib/seed-data"
 import { CircleDetail } from "@/components/panels/circle-detail"
+import { useGraphSync } from "@/hooks/use-graph-sync"
 
 export default function Home() {
   const router = useRouter()
   const supabase = createClient()
-  const { setNodes, setEdges } = useGraphStore()
   const [mounted, setMounted] = useState(false)
   const [loadingAuth, setLoadingAuth] = useState(true)
+  
+  // Connect graph to DB
+  const { loading: syncLoading } = useGraphSync()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -39,12 +40,10 @@ export default function Home() {
   }, [router, supabase.auth])
 
   useEffect(() => {
-    setNodes(SEED_NODES)
-    setEdges(SEED_EDGES)
     setMounted(true)
-  }, [setNodes, setEdges])
+  }, [])
 
-  if (!mounted || loadingAuth) return null
+  if (!mounted || loadingAuth || syncLoading) return null
 
   return (
     <ReactFlowProvider>

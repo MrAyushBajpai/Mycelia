@@ -7,6 +7,7 @@ import {
   type NodeTypes,
   type Connection,
   MarkerType,
+  ConnectionMode,
   type DefaultEdgeOptions,
   useReactFlow
 } from "@xyflow/react"
@@ -32,7 +33,6 @@ const edgeTypes = {
 // Increased contrast for edges so they are visible
 const defaultEdgeOptions: DefaultEdgeOptions = {
   type: "default",
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "rgba(255, 255, 255, 0.4)" },
   style: { strokeWidth: 1.5, stroke: "rgba(255, 255, 255, 0.25)", zIndex: 0 },
   animated: true,
 }
@@ -125,16 +125,6 @@ export function GraphCanvas() {
               ? "rgba(255, 255, 255, 0.05)" 
               : "rgba(255, 255, 255, 0.25)",
         },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 16,
-          height: 16,
-          color: isConnected 
-            ? "rgba(0, 200, 255, 0.4)" 
-            : isFaded 
-              ? "rgba(255, 255, 255, 0.05)" 
-              : "rgba(255, 255, 255, 0.4)",
-        },
         labelStyle: { 
           fill: isFaded ? "rgba(255, 255, 255, 0.15)" : isConnected ? "rgba(0, 200, 255, 0.9)" : "rgba(255, 255, 255, 0.6)", 
           fontSize: 10, 
@@ -192,6 +182,7 @@ export function GraphCanvas() {
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           deleteKeyCode={["Backspace", "Delete"]}
+          connectionMode={ConnectionMode.Loose}
           fitView
           proOptions={{ hideAttribution: true }}
         >

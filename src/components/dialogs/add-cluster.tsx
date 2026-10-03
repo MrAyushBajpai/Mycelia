@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { useGraphStore } from "@/stores/graph-store"
+import { createClient } from "@/lib/supabase/client"
 
 const COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"]
 
@@ -15,24 +16,41 @@ type Props = {
 }
 
 export function AddClusterDialog({ open, onOpenChange }: Props) {
+  const supabase = createClient()
   const [name, setName] = useState("")
   const [color, setColor] = useState(COLORS[0])
   const setNodes = useGraphStore((s) => s.setNodes)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
 
-    const id = `c-${Date.now()}`
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const clusterId = crypto.randomUUID()
+    const ui_x = Math.round(Math.random() * 300)
+    const ui_y = Math.round(Math.random() * 300)
+
     const newNode = {
-      id,
+      id: clusterId,
       type: "cluster" as const,
-      position: { x: Math.random() * 300, y: Math.random() * 300 },
+      position: { x: ui_x, y: ui_y },
       data: { label: name.trim(), color },
     }
 
+    await supabase.from("clusters").insert({
+      id: clusterId,
+      user_id: user.id,
+      name: name.trim(),
+      color,
+      ui_x,
+      ui_y
+    })
+
     const currentNodes = useGraphStore.getState().nodes
     setNodes([...currentNodes, newNode])
+    
     setName("")
     setColor(COLORS[0])
     onOpenChange(false)
@@ -40,7 +58,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] text-white rounded-2xl">
+      <DialogContent className="sm:max-w-sm bg-[#050508] border border-white/10 shadow-[0_16px_64px_rgba(0,0,0,0.9)] text-white rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-white/90">Add Circle</DialogTitle>
         </DialogHeader>
@@ -53,6 +71,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. College, Book Club"
               maxLength={100}
+              className="bg-white/5 border-white/10"
               autoFocus
             />
           </div>
@@ -64,7 +83,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className="w-7 h-7 rounded-full border-2 transition-transform"
+                  className="w-7 h-7 rounded-full border-2 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.1)]"
                   style={{
                     backgroundColor: c,
                     borderColor: color === c ? c : "transparent",
@@ -74,7 +93,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
               ))}
             </div>
           </div>
-          <Button type="submit" className="w-full">Add</Button>
+          <Button type="submit" className="w-full">Add Circle</Button>
         </form>
       </DialogContent>
     </Dialog>

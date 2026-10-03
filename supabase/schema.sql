@@ -7,6 +7,8 @@ create table clusters (
   user_id uuid not null references auth.users(id) on delete cascade,
   name varchar(100) not null check (char_length(trim(name)) > 0),
   color varchar(7) default '#6366f1' check (color ~* '^#[0-9a-f]{6}$'),
+  ui_x numeric default 0,
+  ui_y numeric default 0,
   created_at timestamptz default now()
 );
 
@@ -22,6 +24,8 @@ create table contacts (
   custom_dates jsonb default '{}'::jsonb,
   cadence_days integer check (cadence_days > 0), -- remind every N days
   last_contacted_at timestamptz,
+  ui_x numeric default 0,
+  ui_y numeric default 0,
   created_at timestamptz default now()
 );
 
@@ -29,6 +33,8 @@ create table contacts (
 create table contact_clusters (
   contact_id uuid not null references contacts(id) on delete cascade,
   cluster_id uuid not null references clusters(id) on delete cascade,
+  source_handle varchar(50),
+  target_handle varchar(50),
   primary key (contact_id, cluster_id)
 );
 
@@ -38,6 +44,8 @@ create table edges (
   user_id uuid not null references auth.users(id) on delete cascade,
   source_id uuid not null references contacts(id) on delete cascade,
   target_id uuid not null references contacts(id) on delete cascade,
+  source_handle varchar(50),
+  target_handle varchar(50),
   label varchar(100) not null check (char_length(trim(label)) > 0), -- "married to", "works with"
   created_at timestamptz default now()
 );

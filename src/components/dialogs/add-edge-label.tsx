@@ -16,29 +16,26 @@ type Props = {
 
 export function AddEdgeLabelDialog({ open, connection, onOpenChange }: Props) {
   const [label, setLabel] = useState("")
-  const { edges, setEdges } = useGraphStore()
+  const onConnect = useGraphStore((s) => s.onConnect)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!connection) return
-
-    const id = `e-${Date.now()}`
-    setEdges([...edges, { id, source: connection.source, target: connection.target, label: label.trim() || undefined }])
+    onConnect(connection, label.trim() || undefined)
     setLabel("")
     onOpenChange(false)
   }
 
   function handleSkip() {
     if (!connection) return
-    const id = `e-${Date.now()}`
-    setEdges([...edges, { id, source: connection.source, target: connection.target }])
+    onConnect(connection)
     setLabel("")
     onOpenChange(false)
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.8)] text-white rounded-2xl">
+      <DialogContent className="sm:max-w-sm bg-[#050508] border border-white/10 shadow-[0_16px_64px_rgba(0,0,0,0.9)] text-white rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-white/90">Label this connection</DialogTitle>
         </DialogHeader>
@@ -51,6 +48,7 @@ export function AddEdgeLabelDialog({ open, connection, onOpenChange }: Props) {
               onChange={(e) => setLabel(e.target.value)}
               placeholder='e.g. "married to", "works with"'
               maxLength={100}
+              className="bg-white/5 border-white/10"
               autoFocus
             />
           </div>

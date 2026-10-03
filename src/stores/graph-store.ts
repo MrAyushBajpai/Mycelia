@@ -16,7 +16,7 @@ type GraphState = {
   selectedNodeId: string | null
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
-  onConnect: (connection: Connection) => void
+  onConnect: (connection: Connection, label?: string) => void
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
@@ -62,8 +62,42 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set({ edges: applyEdgeChanges(changes, get().edges) })
   },
 
-  onConnect: (connection) => {
-    set({ edges: addEdge({ ...connection, id: `e-${Date.now()}` }, get().edges) })
+  onConnect: async (connection, label?: string) => {
+    const supabase = (await import("@/lib/supabase/client")).createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    // Find node types
+    const sourceNode = get().nodes.find(n => n.id === connection.source)
+    const targetNode = get().nodes.find(n => n.id === connection.target)
+
+    const isContactCluster = sourceNode?.type === "person" && targetNode?.type === "cluster"
+    const edgeId = isContactCluster ? `cc-${connection.source}-${connection.target}` : crypto.randomUUID()
+    
+    const newEdge = { ...connection, id: edgeId, label } as Edge
+    set({ edges: addEdge(newEdge, get().edges) })
+
+    // Insert to Supabase
+    if (isContactCluster) {
+      // It's a contact_cluster relationship
+      await supabase.from("contact_clusters").insert({
+        contact_id: connection.source,
+        cluster_id: connection.target,
+        source_handle: connection.sourceHandle,
+        target_handle: connection.targetHandle
+      })
+    } else {
+      // It's a direct edge
+      await supabase.from("edges").insert({
+        id: edgeId,
+        user_id: user.id,
+        source_id: connection.source,
+        target_id: connection.target,
+        source_handle: connection.sourceHandle,
+        target_handle: connection.targetHandle,
+        label: label || "Connected"
+      })
+    }
   },
 
   setNodes: (nodes) => set({ nodes }),
@@ -73,13 +107,34 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     nodes: state.nodes.map(n => ({ ...n, selected: n.id === id }))
   })),
 
-  deleteNode: (id) => {
+  deleteNode: async (id) => {
     const { nodes, edges, selectedNodeId } = get()
+    const supabase = (await import("@/lib/supabase/client")).createClient()
+    
+    const nodeToDelete = nodes.find(n => n.id === id)
+    const isEdge = !nodeToDelete && edges.some(e => e.id === id)
+
     set({
       nodes: nodes.filter((n) => n.id !== id),
-      edges: edges.filter((e) => e.source !== id && e.target !== id),
+      edges: edges.filter((e) => e.id !== id && e.source !== id && e.target !== id),
       selectedNodeId: selectedNodeId === id ? null : selectedNodeId,
     })
+
+    if (nodeToDelete?.type === "person") {
+      await supabase.from("contacts").delete().eq("id", id)
+    } else if (nodeToDelete?.type === "cluster") {
+      await supabase.from("clusters").delete().eq("id", id)
+    } else if (isEdge) {
+      if (id.startsWith("cc-")) {
+        // Implicit edge (contact_cluster)
+        const parts = id.split("-")
+        if (parts.length === 3) {
+           await supabase.from("contact_clusters").delete().eq("contact_id", parts[1]).eq("cluster_id", parts[2])
+        }
+      } else {
+        await supabase.from("edges").delete().eq("id", id)
+      }
+    }
   },
 
   autoLayout: async (options) => {
