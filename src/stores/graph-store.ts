@@ -16,7 +16,7 @@ type GraphState = {
   selectedNodeId: string | null
   onNodesChange: (changes: NodeChange[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
-  onConnect: (connection: Connection) => void
+  onConnect: (connection: Connection, label?: string) => void
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
@@ -62,7 +62,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set({ edges: applyEdgeChanges(changes, get().edges) })
   },
 
-  onConnect: async (connection) => {
+  onConnect: async (connection, label?: string) => {
     const supabase = (await import("@/lib/supabase/client")).createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -74,7 +74,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const isContactCluster = sourceNode?.type === "person" && targetNode?.type === "cluster"
     const edgeId = isContactCluster ? `cc-${connection.source}-${connection.target}` : crypto.randomUUID()
     
-    const newEdge = { ...connection, id: edgeId } as Edge
+    const newEdge = { ...connection, id: edgeId, label } as Edge
     set({ edges: addEdge(newEdge, get().edges) })
 
     // Insert to Supabase
@@ -95,7 +95,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         target_id: connection.target,
         source_handle: connection.sourceHandle,
         target_handle: connection.targetHandle,
-        label: "Connected"
+        label: label || "Connected"
       })
     }
   },
