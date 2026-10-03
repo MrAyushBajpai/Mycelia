@@ -74,7 +74,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const isContactCluster = sourceNode?.type === "person" && targetNode?.type === "cluster"
     const edgeId = isContactCluster ? `cc-${connection.source}-${connection.target}` : crypto.randomUUID()
     
-    const newEdge = { ...connection, id: edgeId }
+    const newEdge = { ...connection, id: edgeId } as Edge
     set({ edges: addEdge(newEdge, get().edges) })
 
     // Insert to Supabase
