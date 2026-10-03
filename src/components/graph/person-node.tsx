@@ -109,16 +109,12 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
         {isDueSoon && !isOverdue && !isEvent && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
-        <Handle type="target" position={Position.Left} className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
-        <Handle type="source" position={Position.Right} className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
-        
-        <Handle type="source" position={Position.Top} id="top-source" className="opacity-0 pointer-events-none" />
-        <Handle type="target" position={Position.Top} id="top-target" className="opacity-0 pointer-events-none" />
-        <Handle type="source" position={Position.Bottom} id="bottom-source" className="opacity-0 pointer-events-none" />
-        <Handle type="target" position={Position.Bottom} id="bottom-target" className="opacity-0 pointer-events-none" />
-        <Handle type="source" position={Position.Left} id="left-source" className="opacity-0 pointer-events-none" />
-        <Handle type="target" position={Position.Right} id="right-target" className="opacity-0 pointer-events-none" />
-        
+        {/* 4-way handles for easy connection in any direction */}
+        <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase relative overflow-hidden">
             {/* Tiny circular progress indicator behind the initial */}

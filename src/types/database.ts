@@ -29,6 +29,8 @@ export type Edge = {
   user_id: string
   source_id: string
   target_id: string
+  source_handle?: string | null
+  target_handle?: string | null
   label: string
   created_at: string
 }
@@ -45,4 +47,6 @@ export type Interaction = {
 export type ContactCluster = {
   contact_id: string
   cluster_id: string
+  source_handle?: string | null
+  target_handle?: string | null
 }

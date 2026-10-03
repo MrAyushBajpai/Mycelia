@@ -70,6 +70,8 @@ export function useGraphSync() {
           id: e.id,
           source: e.source_id,
           target: e.target_id,
+          sourceHandle: e.source_handle,
+          targetHandle: e.target_handle,
           label: e.label,
           animated: false
         })
@@ -83,6 +85,8 @@ export function useGraphSync() {
           id: `cc-${cc.contact_id}-${cc.cluster_id}`,
           source: cc.contact_id,
           target: cc.cluster_id,
+          sourceHandle: cc.source_handle,
+          targetHandle: cc.target_handle,
           animated: false
         })
       })

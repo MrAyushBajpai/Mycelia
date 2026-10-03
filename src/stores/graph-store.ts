@@ -82,7 +82,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       // It's a contact_cluster relationship
       await supabase.from("contact_clusters").insert({
         contact_id: connection.source,
-        cluster_id: connection.target
+        cluster_id: connection.target,
+        source_handle: connection.sourceHandle,
+        target_handle: connection.targetHandle
       })
     } else {
       // It's a direct edge
@@ -91,6 +93,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         user_id: user.id,
         source_id: connection.source,
         target_id: connection.target,
+        source_handle: connection.sourceHandle,
+        target_handle: connection.targetHandle,
         label: "Connected"
       })
     }

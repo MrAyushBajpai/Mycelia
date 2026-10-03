@@ -33,6 +33,8 @@ create table contacts (
 create table contact_clusters (
   contact_id uuid not null references contacts(id) on delete cascade,
   cluster_id uuid not null references clusters(id) on delete cascade,
+  source_handle varchar(50),
+  target_handle varchar(50),
   primary key (contact_id, cluster_id)
 );
 
@@ -42,6 +44,8 @@ create table edges (
   user_id uuid not null references auth.users(id) on delete cascade,
   source_id uuid not null references contacts(id) on delete cascade,
   target_id uuid not null references contacts(id) on delete cascade,
+  source_handle varchar(50),
+  target_handle varchar(50),
   label varchar(100) not null check (char_length(trim(label)) > 0), -- "married to", "works with"
   created_at timestamptz default now()
 );
