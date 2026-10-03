@@ -27,8 +27,30 @@ export function ContactDetail() {
   const [newDateLabel, setNewDateLabel] = useState("")
   const [newDateValue, setNewDateValue] = useState("")
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editNameValue, setEditNameValue] = useState("")
 
-  // Reset confirmation state when node changes
+  useEffect(() => {
+    if (node) setEditNameValue(String(node.data.label || ""))
+  }, [node])
+
+  async function saveName() {
+    setIsEditingName(false)
+    const val = editNameValue.trim()
+    if (!val || !node) {
+      setEditNameValue(String(node?.data.label || ""))
+      return
+    }
+    if (val === String(node.data.label)) return
+    
+    const currentNodes = useGraphStore.getState().nodes
+    setNodes(currentNodes.map(n => n.id === node.id ? { ...n, data: { ...n.data, label: val } } : n))
+    
+    const supabase = createClient()
+    const table = node.type === "person" ? "contacts" : "clusters"
+    const { error } = await supabase.from(table).update({ name: val }).eq("id", node.id)
+    if (error) console.error("Failed to rename:", error)
+  }
   React.useEffect(() => {
     setConfirmDelete(false)
   }, [selectedNodeId])
@@ -172,7 +194,30 @@ export function ContactDetail() {
           <div className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center text-sm font-semibold text-white/50 uppercase">
             {String(data.label).charAt(0)}
           </div>
-          <h2 className="text-xl font-semibold tracking-tight">{String(data.label)}</h2>
+          {isEditingName ? (
+            <input
+              autoFocus
+              value={editNameValue}
+              onChange={(e) => setEditNameValue(e.target.value)}
+              onBlur={saveName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveName()
+                if (e.key === 'Escape') {
+                  setEditNameValue(String(data.label))
+                  setIsEditingName(false)
+                }
+              }}
+              className="text-xl font-semibold tracking-tight bg-transparent outline-none border-none text-white/90 w-[200px]"
+            />
+          ) : (
+            <h2 
+              className="text-xl font-semibold tracking-tight cursor-text hover:text-white transition-colors"
+              onClick={() => setIsEditingName(true)}
+              title="Click to edit name"
+            >
+              {String(data.label)}
+            </h2>
+          )}
         </div>
         <button onClick={() => selectNode(null)} className="text-white/30 hover:text-white/70 transition-colors p-1 rounded-lg hover:bg-white/[0.06]">
           <X size={18} />
