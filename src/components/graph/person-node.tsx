@@ -109,11 +109,15 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
         {isDueSoon && !isOverdue && !isEvent && (
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
-        {/* 4-way handles for easy connection in any direction */}
-        <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
-        <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
-        <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
-        <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        {/* 4-way handles: each position has source + target so edges snap correctly */}
+        <Handle type="source" position={Position.Top} id="top-src" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="target" position={Position.Top} id="top-tgt" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Right} id="right-src" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="target" position={Position.Right} id="right-tgt" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Bottom} id="bottom-src" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="target" position={Position.Bottom} id="bottom-tgt" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="source" position={Position.Left} id="left-src" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        <Handle type="target" position={Position.Left} id="left-tgt" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
 
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase relative overflow-hidden">
