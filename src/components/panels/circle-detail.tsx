@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/client"
 import { CLUSTER_COLORS } from "@/lib/constants"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore, Interaction } from "@/stores/interaction-store"
 import { X, Edit2, Plus } from "lucide-react"
@@ -11,7 +11,12 @@ import { formatDistanceToNow } from "date-fns"
 type Tab = "overview" | "members" | "activity"
 
 export function CircleDetail() {
-  const { nodes, edges, selectedNodeId, selectNode, setNodes } = useGraphStore()
+  const selectedNodeId = useGraphStore(s => s.selectedNodeId)
+  const selectNode = useGraphStore(s => s.selectNode)
+  const setNodes = useGraphStore(s => s.setNodes)
+  const selectedNode = useGraphStore(s => s.nodes.find(n => n.id === s.selectedNodeId))
+  const nodes = useGraphStore(s => s.nodes)
+  const edges = useGraphStore(s => s.edges)
     const { interactionsByContact } = useInteractionStore()
   
   async function updateColor(newColor: string) {
@@ -26,25 +31,27 @@ export function CircleDetail() {
   
   const [activeTab, setActiveTab] = useState<Tab>("overview")
   
-  const selectedNode = nodes.find(n => n.id === selectedNodeId)
   if (!selectedNode || selectedNode.type !== "cluster") return null
   
   const data = selectedNode.data as any
   const color = data.color || "#ffffff"
   
-  const memberEdges = edges.filter(e => e.target === selectedNode.id)
-  const members = memberEdges.map(e => nodes.find(n => n.id === e.source)).filter(Boolean) as typeof nodes
+  const members = useMemo(() => {
+    const memberEdges = edges.filter(e => e.target === selectedNode.id)
+    return memberEdges.map(e => nodes.find(n => n.id === e.source)).filter(Boolean) as typeof nodes
+  }, [edges, nodes, selectedNode.id])
   
-  const allActivities = members.flatMap(m => {
-    const contactInteractions = interactionsByContact[m.id] || []
-    return contactInteractions.map((interaction: Interaction) => ({
-      person: m,
-      date: new Date(interaction.occurred_at).getTime(),
-      action: interaction.note
-    }))
-  })
-  
-  allActivities.sort((a, b) => b.date - a.date)
+  const allActivities = useMemo(() => {
+    const activities = members.flatMap(m => {
+      const contactInteractions = interactionsByContact[m.id] || []
+      return contactInteractions.map((interaction: Interaction) => ({
+        person: m,
+        date: new Date(interaction.occurred_at).getTime(),
+        action: interaction.note
+      }))
+    })
+    return activities.sort((a, b) => b.date - a.date)
+  }, [members, interactionsByContact])
   
   return (
     <div className="fixed top-0 right-0 w-[360px] h-full bg-[#0a0a0c] border-l border-white/[0.04] shadow-2xl flex flex-col z-40 transform transition-transform duration-300">
@@ -193,4 +200,6 @@ export function CircleDetail() {
     </div>
   )
 }
+
+
 
