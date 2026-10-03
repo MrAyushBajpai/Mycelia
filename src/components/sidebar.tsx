@@ -34,7 +34,7 @@ export function Sidebar() {
     router.push("/login")
   }
 
-  if (pathname === "/login") return null;
+  
 
   return (
     <>
@@ -132,5 +132,6 @@ export function Sidebar() {
     </>
   )
 }
+
 
 
