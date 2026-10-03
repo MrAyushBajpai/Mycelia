@@ -1,9 +1,10 @@
-"use client"
+﻿"use client"
 
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Network, User, Users, Calendar, FileText, Settings, ChevronsLeft, ChevronsUpDown, Menu, LogOut } from "lucide-react"
+import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs"
 import { useUIStore } from "@/stores/ui-store"
 import { createClient } from "@/lib/supabase/client"
 
@@ -102,19 +103,22 @@ export function Sidebar() {
         </div>
 
         {/* User Profile */}
-        <div className="p-4 mb-2 flex items-center gap-2">
-          <div className="flex items-center gap-3 p-2 rounded-xl border border-transparent flex-1 overflow-hidden">
-            <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 text-white/90 font-medium text-sm">
-              {userEmail ? userEmail[0].toUpperCase() : "U"}
-            </div>
-            <div className="flex flex-col items-start flex-1 overflow-hidden">
-              <span className="text-sm font-medium text-white/90 truncate w-full text-left">{userEmail || "User"}</span>
-              <span className="text-[11px] text-white/40 truncate w-full text-left">Personal Workspace</span>
-            </div>
+        <div className="p-4 mb-2 flex items-center justify-between gap-2">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-white/90">Account</span>
+            <span className="text-[11px] text-white/40">Personal Workspace</span>
           </div>
-          <button onClick={handleSignOut} className="p-2 text-white/30 hover:text-white/90 hover:bg-white/5 rounded-lg transition-colors flex-shrink-0" title="Sign out">
-            <LogOut size={16} />
-          </button>
+          <div className="flex-shrink-0">
+            <Show when="signed-in">
+              <UserButton appearance={{ elements: { userButtonAvatarBox: "w-9 h-9" } }} />
+            </Show>
+            <Show when="signed-out">
+              <div className="flex gap-2">
+                <SignInButton />
+                <SignUpButton />
+              </div>
+            </Show>
+          </div>
         </div>
       </div>
       
@@ -128,3 +132,5 @@ export function Sidebar() {
     </>
   )
 }
+
+
