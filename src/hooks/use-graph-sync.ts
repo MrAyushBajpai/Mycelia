@@ -62,6 +62,10 @@ export function useGraphSync() {
         position: { x: c.ui_x || 0, y: c.ui_y || 0 },
         data: { 
           label: c.name, 
+          email: c.email || null,
+          phone: c.phone || null,
+          notes: c.notes || null,
+          avatarUrl: c.avatar_url || null,
           cadenceDays: c.cadence_days,
           lastContacted: c.last_contacted_at,
           customDates: c.custom_dates || {}
@@ -95,6 +99,7 @@ export function useGraphSync() {
           target: cc.cluster_id,
           sourceHandle: cc.source_handle,
           targetHandle: cc.target_handle,
+          label: cc.label || undefined,
           animated: false
         })
       })

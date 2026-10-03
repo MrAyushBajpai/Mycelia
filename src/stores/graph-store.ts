@@ -60,6 +60,25 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
   onEdgesChange: (changes) => {
     set({ edges: applyEdgeChanges(changes, get().edges) })
+    
+    // Handle deletions in DB
+    const removes = changes.filter(c => c.type === "remove")
+    if (removes.length > 0) {
+      import("@/lib/supabase/client").then(({ createClient }) => {
+        const supabase = createClient()
+        removes.forEach(async (change: any) => {
+          const id = change.id
+          if (id.startsWith("cc-")) {
+            const parts = id.split("-")
+            if (parts.length === 3) {
+              await supabase.from("contact_clusters").delete().eq("contact_id", parts[1]).eq("cluster_id", parts[2])
+            }
+          } else {
+            await supabase.from("edges").delete().eq("id", id)
+          }
+        })
+      })
+    }
   },
 
   onConnect: async (connection, label?: string) => {
@@ -71,21 +90,32 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const sourceNode = get().nodes.find(n => n.id === connection.source)
     const targetNode = get().nodes.find(n => n.id === connection.target)
 
-    const isContactCluster = sourceNode?.type === "person" && targetNode?.type === "cluster"
-    const edgeId = isContactCluster ? `cc-${connection.source}-${connection.target}` : crypto.randomUUID()
+    const isContactCluster = (sourceNode?.type === "person" && targetNode?.type === "cluster") || 
+                             (sourceNode?.type === "cluster" && targetNode?.type === "person")
+
+    const contactId = sourceNode?.type === "person" ? connection.source : connection.target
+    const clusterId = sourceNode?.type === "cluster" ? connection.source : connection.target
+
+    const edgeId = isContactCluster ? `cc-${contactId}-${clusterId}` : crypto.randomUUID()
     
+    // For local state, keep the visual direction they drew
     const newEdge = { ...connection, id: edgeId, label } as Edge
     set({ edges: addEdge(newEdge, get().edges) })
 
     // Insert to Supabase
     if (isContactCluster) {
-      // It's a contact_cluster relationship
-      await supabase.from("contact_clusters").insert({
-        contact_id: connection.source,
-        cluster_id: connection.target,
-        source_handle: connection.sourceHandle,
-        target_handle: connection.targetHandle
-      })
+      // It's a contact_cluster relationship.
+      // If they drew cluster->person, we must map their visual source/target to contact/cluster.
+      const isReversed = sourceNode?.type === "cluster"
+      
+      const { error } = await supabase.from("contact_clusters").upsert({
+        contact_id: contactId,
+        cluster_id: clusterId,
+        source_handle: isReversed ? connection.targetHandle : connection.sourceHandle,
+        target_handle: isReversed ? connection.sourceHandle : connection.targetHandle,
+        label: label || null
+      }, { onConflict: "contact_id,cluster_id" })
+      if (error) console.error("Upsert contact_clusters error:", error)
     } else {
       // It's a direct edge
       await supabase.from("edges").insert({
