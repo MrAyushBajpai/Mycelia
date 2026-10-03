@@ -1,3 +1,4 @@
+﻿import { CLUSTER_COLORS } from "@/lib/constants"
 "use client"
 
 import * as React from "react"
@@ -34,6 +35,14 @@ export function ContactDetail() {
     if (node) setEditNameValue(String(node.data.label || ""))
   }, [node])
 
+  async function updateColor(newColor: string) {
+    if (node?.type !== "cluster") return
+    const currentNodes = useGraphStore.getState().nodes
+    setNodes(currentNodes.map(n => n.id === node.id ? { ...n, data: { ...n.data, color: newColor } } : n))
+    const supabase = createClient()
+    const { error } = await supabase.from("clusters").update({ color: newColor }).eq("id", node.id)
+    if (error) console.error("Failed to update color:", error)
+  }
   async function saveName() {
     setIsEditingName(false)
     const val = editNameValue.trim()
@@ -55,7 +64,7 @@ export function ContactDetail() {
     setConfirmDelete(false)
   }, [selectedNodeId])
 
-  if (!node || node.type === "cluster") return null
+  if (!node) return null
 
   const data = node.data as Record<string, unknown>
   const customDates = (data.customDates as Record<string, string>) || {}
@@ -85,7 +94,7 @@ export function ContactDetail() {
     else lastContactedStr = `${days} days ago`
   }
 
-  let nextContactStr = "—"
+  let nextContactStr = "â€”"
   let isOverdue = false
   if (lastContactedDate && cadence) {
     const nextDate = new Date(lastContactedDate.getTime() + cadence * 86400000)
@@ -225,6 +234,27 @@ export function ContactDetail() {
       </div>
 
       <div className="space-y-6 text-sm flex-1">
+        {node.type === "cluster" && (
+          <Section title="Appearance">
+            <div className="flex gap-2">
+              {CLUSTER_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => updateColor(c)}
+                  className="w-7 h-7 rounded-full border-2 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.1)] hover:scale-110"
+                  style={{ 
+                    backgroundColor: c, 
+                    borderColor: data.color === c ? "white" : "transparent",
+                    transform: data.color === c ? "scale(1.1)" : "scale(1)"
+                  }}
+                />
+              ))}
+            </div>
+          </Section>
+        )}
+        {node.type === "person" && (
+          <>
         
         <Section title="Contact">
           <EditableField label="Email" value={data.email as string} onChange={(v) => updateField("email", v)} maxLength={255} />
@@ -233,7 +263,7 @@ export function ContactDetail() {
 
         <Section title="Action & History">
           <DisplayField label="Last interaction" value={lastContactedStr} />
-          <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
+          <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "â€”"} />
           <div className="flex flex-col mt-1">
             <span className="text-[12px] font-normal text-white/40 py-1">Reason for next contact</span>
             <textarea
@@ -362,12 +392,14 @@ export function ContactDetail() {
             }}
           />
         </Section>
+          </>
+        )}
       </div>
 
       {!confirmDelete ? (
         <Button variant="ghost" size="sm" className="w-full mt-6 text-white/30 hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => setConfirmDelete(true)}>
           <Trash2 size={13} data-icon="inline-start" />
-          Remove Person
+          Remove {node.type === "person" ? "Person" : "Circle"}
         </Button>
       ) : (
         <div className="mt-6 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-200">
@@ -418,7 +450,7 @@ function EditableField({
         type={type}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="—"
+        placeholder="â€”"
         maxLength={maxLength}
         min={min}
         className="bg-transparent text-right text-[13px] font-normal outline-none w-full min-w-0 text-white/90 placeholder:text-muted-foreground/30 focus:text-primary transition-colors"
@@ -445,3 +477,4 @@ function DisplayField({
     </div>
   )
 }
+
