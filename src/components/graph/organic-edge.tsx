@@ -1,4 +1,4 @@
-﻿import { memo, useState, useRef, useEffect } from "react"
+import { memo, useState, useRef, useEffect } from "react"
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useStore, useReactFlow, type EdgeProps } from "@xyflow/react"
 import { useGraphStore } from "@/stores/graph-store"
 import { X } from "lucide-react"
@@ -31,7 +31,7 @@ export const OrganicEdge = memo(function OrganicEdge({
   const isFaded = style?.stroke === "rgba(255, 255, 255, 0.05)"
   const labelScale = Math.max(1, 0.8 / zoom)
 
-  const { deleteElements } = useReactFlow()
+  const { deleteElements, setEdges } = useReactFlow()
   const updateEdgeLabel = useGraphStore(s => s.updateEdgeLabel)
   
   const [isEditing, setIsEditing] = useState(false)
@@ -95,7 +95,8 @@ export const OrganicEdge = memo(function OrganicEdge({
               )}
               onClick={(e) => {
                 e.stopPropagation()
-                if (selected) setIsEditing(true)
+                setEdges(eds => eds.map(edge => ({ ...edge, selected: edge.id === id })))
+                setIsEditing(true)
               }}
             >
               {isEditing ? (
