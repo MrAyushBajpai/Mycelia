@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useCallback, useEffect, useMemo } from "react"
 import {
@@ -68,7 +68,14 @@ function DynamicBackground() {
 }
 
 export function GraphCanvas() {
-  const { nodes, edges, selectedNodeId, onNodesChange, onEdgesChange, selectNode, autoLayout } = useGraphStore()
+  const nodes = useGraphStore(s => s.nodes)
+  const edges = useGraphStore(s => s.edges)
+  const selectedNodeId = useGraphStore(s => s.selectedNodeId)
+  const onNodesChange = useGraphStore(s => s.onNodesChange)
+  const onEdgesChange = useGraphStore(s => s.onEdgesChange)
+  const selectNode = useGraphStore(s => s.selectNode)
+  const autoLayout = useGraphStore(s => s.autoLayout)
+  const onConnect = useGraphStore(s => s.onConnect)
   const syncGraph = useNotificationStore((s) => s.syncGraph)
   const now = useTimeStore((s) => s.now)
   const { fitView } = useReactFlow()
@@ -198,3 +205,4 @@ export function GraphCanvas() {
     </div>
   )
 }
+

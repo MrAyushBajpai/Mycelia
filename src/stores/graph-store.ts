@@ -1,4 +1,4 @@
-﻿import { create } from "zustand"
+import { create } from "zustand"
 import {
   type Node,
   type Edge,
@@ -59,19 +59,14 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     // Handle node deletions in DB when user presses backspace/delete
     const removes = changes.filter(c => c.type === "remove")
     if (removes.length > 0) {
-      // capture old nodes before we lose them
       const oldNodes = get().nodes
       import("@/lib/supabase/client").then(({ createClient }) => {
         const supabase = createClient()
-        removes.forEach(async (change: any) => {
-          const id = change.id
-          const node = oldNodes.find(n => n.id === id) || { type: "person" }
-          if (node.type === "person") {
-            await supabase.from("contacts").delete().eq("id", id)
-          } else if (node.type === "cluster") {
-            await supabase.from("clusters").delete().eq("id", id)
-          }
-        })
+        const personIds = removes.filter(c => (oldNodes.find(n => n.id === c.id)?.type || "person") === "person").map(c => c.id)
+        const clusterIds = removes.filter(c => oldNodes.find(n => n.id === c.id)?.type === "cluster").map(c => c.id)
+        
+        if (personIds.length > 0) supabase.from("contacts").delete().in("id", personIds).then()
+        if (clusterIds.length > 0) supabase.from("clusters").delete().in("id", clusterIds).then()
       })
     }
     
@@ -86,15 +81,18 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     if (removes.length > 0) {
       import("@/lib/supabase/client").then(({ createClient }) => {
         const supabase = createClient()
-        removes.forEach(async (change: any) => {
-          const id = change.id
-          if (id.startsWith("cc-")) {
-            const parts = id.split("-")
-            if (parts.length === 3) {
-              await supabase.from("contact_clusters").delete().eq("contact_id", parts[1]).eq("cluster_id", parts[2])
-            }
-          } else {
-            await supabase.from("edges").delete().eq("id", id)
+        
+        const standardEdgeIds = removes.map(c => c.id).filter(id => !id.startsWith("cc-"))
+        if (standardEdgeIds.length > 0) {
+          supabase.from("edges").delete().in("id", standardEdgeIds).then()
+        }
+
+        // Implicit edges need compound key deletion
+        const implicitEdges = removes.map(c => c.id).filter(id => id.startsWith("cc-"))
+        implicitEdges.forEach(id => {
+          const parts = id.split("-")
+          if (parts.length === 3) {
+            supabase.from("contact_clusters").delete().eq("contact_id", parts[1]).eq("cluster_id", parts[2]).then()
           }
         })
       })
