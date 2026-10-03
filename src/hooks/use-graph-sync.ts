@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { useGraphStore } from "@/stores/graph-store"
+import { useInteractionStore } from "@/stores/interaction-store"
 import { createClient } from "@/lib/supabase/client"
 import { Node, Edge } from "@xyflow/react"
 
@@ -23,17 +24,24 @@ export function useGraphSync() {
       { data: contacts },
       { data: clusters },
       { data: dbEdges },
-      { data: contactClusters }
+      { data: contactClusters },
+      { data: interactions }
     ] = await Promise.all([
       supabase.from("contacts").select("*"),
       supabase.from("clusters").select("*"),
       supabase.from("edges").select("*"),
-      supabase.from("contact_clusters").select("*")
+      supabase.from("contact_clusters").select("*"),
+      supabase.from("interactions").select("*")
     ])
 
     if (!contacts || !clusters) {
       setLoading(false)
       return
+    }
+
+    // Process Interactions
+    if (interactions) {
+      useInteractionStore.getState().setInteractions(interactions)
     }
 
     const mappedNodes: Node[] = []
@@ -94,12 +102,23 @@ export function useGraphSync() {
 
     setNodes(mappedNodes)
     setEdges(mappedEdges)
+    
+    // Initialize lastSavedRef to prevent on-load saves
+    const initialPositions: Record<string, {x: number, y: number}> = {}
+    mappedNodes.forEach(n => {
+      initialPositions[n.id] = { x: Math.round(n.position.x), y: Math.round(n.position.y) }
+    })
+    lastSavedRef.current = initialPositions
+
     setLoading(false)
   }, [setNodes, setEdges, supabase])
 
   useEffect(() => {
     fetchGraphData()
   }, [fetchGraphData])
+
+  // Track last saved positions to only update what changed
+  const lastSavedRef = useRef<Record<string, {x: number, y: number}>>({})
 
   // Debounced save positions
   const savePositions = useCallback((currentNodes: Node[]) => {
@@ -109,26 +128,24 @@ export function useGraphSync() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Only save nodes that have been manually dragged
-      const contactsToUpdate = currentNodes.filter(n => n.type === "person" && n.data.manuallyPositioned).map(n => ({
-        id: n.id,
-        user_id: user.id,
-        ui_x: Math.round(n.position.x),
-        ui_y: Math.round(n.position.y)
-      }))
+      const contactsToUpdate: any[] = []
+      const clustersToUpdate: any[] = []
 
-      const clustersToUpdate = currentNodes.filter(n => n.type === "cluster" && n.data.manuallyPositioned).map(n => ({
-        id: n.id,
-        user_id: user.id,
-        ui_x: Math.round(n.position.x),
-        ui_y: Math.round(n.position.y)
-      }))
+      currentNodes.forEach(n => {
+        const x = Math.round(n.position.x)
+        const y = Math.round(n.position.y)
+        const last = lastSavedRef.current[n.id]
+        
+        // Only save if moved
+        if (!last || last.x !== x || last.y !== y) {
+          lastSavedRef.current[n.id] = { x, y }
+          
+          const payload = { id: n.id, user_id: user.id, ui_x: x, ui_y: y }
+          if (n.type === "person") contactsToUpdate.push(payload)
+          else if (n.type === "cluster") clustersToUpdate.push(payload)
+        }
+      })
 
-      // We use upsert for simplicity, but strictly we are updating existing rows.
-      // Upsert needs the required fields if inserting, but since the IDs exist it acts as an update.
-      // Actually, standard update might be safer if not all fields are provided.
-      // But Supabase allows patching multiple rows only if we use an array in upsert with onConflict.
-      // Let's iterate and update because Supabase bulk update is weird without all columns.
       if (contactsToUpdate.length > 0) {
         Promise.all(contactsToUpdate.map(c => 
           supabase.from("contacts").update({ ui_x: c.ui_x, ui_y: c.ui_y }).eq("id", c.id)

@@ -27,7 +27,7 @@ export function CircleDetail() {
     const contactInteractions = interactionsByContact[m.id] || []
     return contactInteractions.map((interaction: Interaction) => ({
       person: m,
-      date: new Date(interaction.occurredAt).getTime(),
+      date: new Date(interaction.occurred_at).getTime(),
       action: interaction.note
     }))
   })

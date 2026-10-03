@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { X, Trash2, Send } from "lucide-react"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore } from "@/stores/interaction-store"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -107,39 +108,61 @@ export function ContactDetail() {
     setLogDate("")
   }
 
-  function updateField(field: string, value: string) {
+  async function updateField(field: string, value: string) {
     const currentNodes = useGraphStore.getState().nodes
+    const parsedValue = field === "cadenceDays" ? (value ? parseInt(value, 10) : null) : (value || null)
+    
     const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
-      const parsedValue = field === "cadenceDays" ? (value ? parseInt(value, 10) : null) : (value || null)
       return { ...n, data: { ...n.data, [field]: parsedValue } }
     })
     setNodes(updated)
+
+    // DB Sync
+    const supabase = createClient()
+    let dbField = field
+    if (field === 'cadenceDays') dbField = 'cadence_days'
+    
+    // Only update valid DB columns
+    if (["email", "phone", "notes", "cadence_days"].includes(dbField)) {
+      await supabase.from("contacts").update({ [dbField]: parsedValue }).eq("id", node!.id)
+    }
   }
 
-  function handleAddCustomDate(e: React.FormEvent) {
+  async function handleAddCustomDate(e: React.FormEvent) {
     e.preventDefault()
     if (!newDateLabel.trim() || !newDateValue) return
     const currentNodes = useGraphStore.getState().nodes
+    let newDates = {}
     const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
       const existing = (n.data.customDates as Record<string, string>) || {}
-      return { ...n, data: { ...n.data, customDates: { ...existing, [newDateLabel.trim()]: newDateValue } } }
+      newDates = { ...existing, [newDateLabel.trim()]: newDateValue }
+      return { ...n, data: { ...n.data, customDates: newDates } }
     })
     setNodes(updated)
+    
+    const supabase = createClient()
+    await supabase.from("contacts").update({ custom_dates: newDates }).eq("id", node!.id)
+    
     setNewDateLabel("")
     setNewDateValue("")
   }
 
-  function removeCustomDate(labelToRemove: string) {
+  async function removeCustomDate(labelToRemove: string) {
     const currentNodes = useGraphStore.getState().nodes
+    let newDates = {}
     const updated = currentNodes.map((n) => {
       if (n.id !== node!.id) return n
       const existing = { ...((n.data.customDates as Record<string, string>) || {}) }
       delete existing[labelToRemove]
+      newDates = existing
       return { ...n, data: { ...n.data, customDates: existing } }
     })
     setNodes(updated)
+
+    const supabase = createClient()
+    await supabase.from("contacts").update({ custom_dates: newDates }).eq("id", node!.id)
   }
 
   return (
@@ -255,7 +278,7 @@ export function ContactDetail() {
                 <div key={i.id} className="flex items-start justify-between py-1.5 border-t border-white/5 first:border-0">
                   <p className="text-sm pr-4 line-clamp-2 leading-relaxed">{i.note}</p>
                   <span className="text-[10px] text-white/30 shrink-0 mt-0.5 tabular-nums">
-                    {new Date(i.occurredAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {new Date(i.occurred_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
               ))}

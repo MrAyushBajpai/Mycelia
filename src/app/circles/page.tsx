@@ -18,12 +18,8 @@ export default function CirclesPage() {
   const [sortBy, setSortBy] = useState<SortOption>("recent")
 
   useEffect(() => {
-    if (nodes.length === 0) {
-      setNodes(SEED_NODES)
-      setEdges(SEED_EDGES)
-    }
     setMounted(true)
-  }, [nodes.length, setNodes, setEdges])
+  }, [])
 
   const circles = useMemo(() => nodes.filter(n => n.type === "cluster"), [nodes])
 

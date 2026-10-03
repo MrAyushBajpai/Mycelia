@@ -2,10 +2,14 @@
 
 import { usePathname } from "next/navigation"
 import { useUIStore } from "@/stores/ui-store"
+import { useGraphSync } from "@/hooks/use-graph-sync"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { sidebarOpen } = useUIStore()
   const pathname = usePathname()
+  
+  // Globally hydrate store (runs once per load, auto-saves on change)
+  useGraphSync()
 
   const isLogin = pathname === "/login"
 

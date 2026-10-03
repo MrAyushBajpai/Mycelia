@@ -1,34 +1,59 @@
 import { create } from "zustand"
+import { createClient } from "@/lib/supabase/client"
 
 export type Interaction = {
   id: string
-  contactId: string
+  contact_id: string
   note: string
-  occurredAt: string
+  occurred_at: string
 }
 
 type InteractionState = {
-  // mapped by contactId for O(1) lookup
   interactionsByContact: Record<string, Interaction[]>
-  addInteraction: (contactId: string, note: string, occurredAt?: string) => void
+  setInteractions: (interactions: any[]) => void
+  addInteraction: (contactId: string, note: string, occurredAt?: string) => Promise<void>
   getByContact: (contactId: string) => Interaction[]
 }
 
 export const useInteractionStore = create<InteractionState>((set, get) => ({
   interactionsByContact: {},
 
-  addInteraction: (contactId, note, occurredAt) => {
-    const interaction: Interaction = {
-      id: `i-${Date.now()}`,
-      contactId,
-      note,
-      occurredAt: occurredAt ? new Date(occurredAt).toISOString() : new Date().toISOString(),
+  setInteractions: (interactions) => {
+    const grouped = interactions.reduce((acc, interaction) => {
+      const cid = interaction.contact_id
+      if (!acc[cid]) acc[cid] = []
+      acc[cid].push(interaction)
+      return acc
+    }, {} as Record<string, Interaction[]>)
+
+    // Sort all arrays
+    for (const key in grouped) {
+      grouped[key].sort((a: Interaction, b: Interaction) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
     }
+
+    set({ interactionsByContact: grouped })
+  },
+
+  addInteraction: async (contactId, note, occurredAt) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const occurred = occurredAt ? new Date(occurredAt).toISOString() : new Date().toISOString()
+    
+    // Optimistic insert
+    const tempId = `temp-${Date.now()}`
+    const tempInteraction: Interaction = {
+      id: tempId,
+      contact_id: contactId,
+      note,
+      occurred_at: occurred,
+    }
+
     set((state) => {
       const existing = state.interactionsByContact[contactId] || []
-      // Insert sorted (newest first assuming mostly adding new ones)
-      const updated = [interaction, ...existing].sort(
-        (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+      const updated = [tempInteraction, ...existing].sort(
+        (a: Interaction, b: Interaction) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
       )
       return {
         interactionsByContact: {
@@ -37,6 +62,28 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
         },
       }
     })
+
+    // Persist to DB
+    const { data, error } = await supabase.from('interactions').insert({
+      user_id: user.id,
+      contact_id: contactId,
+      note,
+      occurred_at: occurred
+    }).select().single()
+
+    if (data && !error) {
+      // Replace temp with real
+      set((state) => {
+        const existing = state.interactionsByContact[contactId] || []
+        const updated = existing.map(i => i.id === tempId ? data : i)
+        return {
+          interactionsByContact: {
+            ...state.interactionsByContact,
+            [contactId]: updated,
+          },
+        }
+      })
+    }
   },
 
   getByContact: (contactId) => {

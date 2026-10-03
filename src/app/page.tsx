@@ -17,9 +17,6 @@ export default function Home() {
   const supabase = createClient()
   const [mounted, setMounted] = useState(false)
   const [loadingAuth, setLoadingAuth] = useState(true)
-  
-  // Connect graph to DB
-  const { loading: syncLoading } = useGraphSync()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -43,7 +40,7 @@ export default function Home() {
     setMounted(true)
   }, [])
 
-  if (!mounted || loadingAuth || syncLoading) return null
+  if (!mounted || loadingAuth) return null
 
   return (
     <ReactFlowProvider>

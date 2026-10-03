@@ -121,9 +121,11 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     })
 
     if (nodeToDelete?.type === "person") {
-      await supabase.from("contacts").delete().eq("id", id)
+      const { error } = await supabase.from("contacts").delete().eq("id", id)
+      if (error) console.error("Contact delete error:", error)
     } else if (nodeToDelete?.type === "cluster") {
-      await supabase.from("clusters").delete().eq("id", id)
+      const { error } = await supabase.from("clusters").delete().eq("id", id)
+      if (error) console.error("Cluster delete error:", error)
     } else if (isEdge) {
       if (id.startsWith("cc-")) {
         // Implicit edge (contact_cluster)
