@@ -1,11 +1,12 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { useState, useEffect } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { X, Trash2, Send } from "lucide-react"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore } from "@/stores/interaction-store"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -20,6 +21,7 @@ export function ContactDetail() {
   
   const edges = useGraphStore((s) => s.edges)
   const interactions = useInteractionStore((s) => s.interactionsByContact[node?.id || ""] || EMPTY_ARRAY)
+  const { userId, getToken } = useAuth()
   const addInteraction = useInteractionStore((s) => s.addInteraction)
 
   const [logInput, setLogInput] = useState("")
@@ -46,7 +48,7 @@ export function ContactDetail() {
     const currentNodes = useGraphStore.getState().nodes
     setNodes(currentNodes.map(n => n.id === node.id ? { ...n, data: { ...n.data, label: val } } : n))
     
-    const supabase = createClient()
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     const table = node.type === "person" ? "contacts" : "clusters"
     const { error } = await supabase.from(table).update({ name: val }).eq("id", node.id)
     if (error) console.error("Failed to rename:", error)
@@ -85,7 +87,7 @@ export function ContactDetail() {
     else lastContactedStr = `${days} days ago`
   }
 
-  let nextContactStr = "—"
+  let nextContactStr = "â€”"
   let isOverdue = false
   if (lastContactedDate && cadence) {
     const nextDate = new Date(lastContactedDate.getTime() + cadence * 86400000)
@@ -141,7 +143,7 @@ export function ContactDetail() {
     setNodes(updated)
 
     // DB Sync
-    const supabase = createClient()
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     let dbField = field
     if (field === 'cadenceDays') dbField = 'cadence_days'
     
@@ -164,7 +166,7 @@ export function ContactDetail() {
     })
     setNodes(updated)
     
-    const supabase = createClient()
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     await supabase.from("contacts").update({ custom_dates: newDates }).eq("id", node!.id)
     
     setNewDateLabel("")
@@ -183,7 +185,7 @@ export function ContactDetail() {
     })
     setNodes(updated)
 
-    const supabase = createClient()
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     await supabase.from("contacts").update({ custom_dates: newDates }).eq("id", node!.id)
   }
 
@@ -233,7 +235,7 @@ export function ContactDetail() {
 
         <Section title="Action & History">
           <DisplayField label="Last interaction" value={lastContactedStr} />
-          <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "—"} />
+          <DisplayField label="Next follow-up" value={nextContactStr} alert={isOverdue} highlight={!isOverdue && nextContactStr !== "â€”"} />
           <div className="flex flex-col mt-1">
             <span className="text-[12px] font-normal text-white/40 py-1">Reason for next contact</span>
             <textarea
@@ -418,7 +420,7 @@ function EditableField({
         type={type}
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="—"
+        placeholder="â€”"
         maxLength={maxLength}
         min={min}
         className="bg-transparent text-right text-[13px] font-normal outline-none w-full min-w-0 text-white/90 placeholder:text-muted-foreground/30 focus:text-primary transition-colors"
@@ -445,3 +447,5 @@ function DisplayField({
     </div>
   )
 }
+
+

@@ -1,6 +1,7 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
+import { useAuth } from "@clerk/nextjs"
 import * as chrono from "chrono-node"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { useGraphStore } from "@/stores/graph-store"
@@ -11,6 +12,7 @@ export function CommandBar() {
   const [input, setInput] = useState("")
   
   const setNodes = useGraphStore(s => s.setNodes)
+  const { userId, getToken } = useAuth()
   const { addInteraction } = useInteractionStore()
 
   useEffect(() => {
@@ -129,7 +131,7 @@ export function CommandBar() {
     // Log interaction for every matched node using the cleaned input
     const nodes = useGraphStore.getState().nodes
     matchedNodes.forEach(id => {
-      addInteraction(id, cleanInput, parsedDate)
+      addInteraction(id, cleanInput, parsedDate, userId ?? undefined, () => getToken({ template: "supabase" }))
       
       // Update lastContacted
       const node = nodes.find(n => n.id === id)
@@ -197,3 +199,4 @@ export function CommandBar() {
     </Dialog>
   )
 }
+

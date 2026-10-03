@@ -1,24 +1,27 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore } from "@/stores/interaction-store"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 import { Node, Edge } from "@xyflow/react"
 
 export function useGraphSync() {
-  const supabase = createClient()
+  const { userId, getToken } = useAuth()
   const { setNodes, setEdges, nodes } = useGraphStore()
   const [loading, setLoading] = useState(true)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSavedRef = useRef<Record<string, {x: number, y: number}>>({})
 
   const fetchGraphData = useCallback(async () => {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    if (!userId) {
       setLoading(false)
       return
     }
+    setLoading(true)
+
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
 
     const [
       { data: contacts },
@@ -39,7 +42,6 @@ export function useGraphSync() {
       return
     }
 
-    // Process Interactions
     if (interactions) {
       useInteractionStore.getState().setInteractions(interactions)
     }
@@ -75,7 +77,6 @@ export function useGraphSync() {
 
     const mappedEdges: Edge[] = []
     
-    // Edges between contacts
     if (dbEdges) {
       dbEdges.forEach((e: any) => {
         mappedEdges.push({
@@ -90,7 +91,6 @@ export function useGraphSync() {
       })
     }
 
-    // Implicit edges from contact_clusters
     if (contactClusters) {
       contactClusters.forEach((cc: any) => {
         mappedEdges.push({
@@ -108,7 +108,6 @@ export function useGraphSync() {
     setNodes(mappedNodes)
     setEdges(mappedEdges)
     
-    // Initialize lastSavedRef to prevent on-load saves
     const initialPositions: Record<string, {x: number, y: number}> = {}
     mappedNodes.forEach(n => {
       initialPositions[n.id] = { x: Math.round(n.position.x), y: Math.round(n.position.y) }
@@ -116,22 +115,19 @@ export function useGraphSync() {
     lastSavedRef.current = initialPositions
 
     setLoading(false)
-  }, [setNodes, setEdges, supabase])
+  }, [userId, getToken, setNodes, setEdges])
 
   useEffect(() => {
     fetchGraphData()
   }, [fetchGraphData])
 
-  // Track last saved positions to only update what changed
-  const lastSavedRef = useRef<Record<string, {x: number, y: number}>>({})
-
-  // Debounced save positions
   const savePositions = useCallback((currentNodes: Node[]) => {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
     
     saveTimeoutRef.current = setTimeout(async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!userId) return
+
+      const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
 
       const contactsToUpdate: any[] = []
       const clustersToUpdate: any[] = []
@@ -141,11 +137,10 @@ export function useGraphSync() {
         const y = Math.round(n.position.y)
         const last = lastSavedRef.current[n.id]
         
-        // Only save if moved
         if (!last || last.x !== x || last.y !== y) {
           lastSavedRef.current[n.id] = { x, y }
           
-          const payload = { id: n.id, user_id: user.id, ui_x: x, ui_y: y }
+          const payload = { id: n.id, user_id: userId, ui_x: x, ui_y: y }
           if (n.type === "person") contactsToUpdate.push(payload)
           else if (n.type === "cluster") clustersToUpdate.push(payload)
         }
@@ -163,7 +158,7 @@ export function useGraphSync() {
         ))
       }
     }, 1000)
-  }, [supabase])
+  }, [userId, getToken])
 
   useEffect(() => {
     if (nodes.length > 0 && !loading) {

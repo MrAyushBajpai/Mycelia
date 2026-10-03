@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,19 +17,20 @@ type Props = {
 
 export function AddEdgeLabelDialog({ open, connection, onOpenChange }: Props) {
   const [label, setLabel] = useState("")
+  const { userId, getToken } = useAuth()
   const onConnect = useGraphStore((s) => s.onConnect)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!connection) return
-    onConnect(connection, label.trim() || undefined)
+    onConnect(connection, label.trim() || undefined, userId ?? undefined, () => getToken({ template: "supabase" }))
     setLabel("")
     onOpenChange(false)
   }
 
   function handleSkip() {
     if (!connection) return
-    onConnect(connection)
+    onConnect(connection, undefined, userId ?? undefined, () => getToken({ template: "supabase" }))
     setLabel("")
     onOpenChange(false)
   }

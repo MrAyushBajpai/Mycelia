@@ -1,12 +1,13 @@
 ﻿"use client"
 
 import { useState } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { useGraphStore } from "@/stores/graph-store"
-import { createClient } from "@/lib/supabase/client"
+import { createAuthenticatedClient } from "@/lib/supabase/client"
 
 import { CLUSTER_COLORS } from "@/lib/constants"
 
@@ -16,7 +17,7 @@ type Props = {
 }
 
 export function AddClusterDialog({ open, onOpenChange }: Props) {
-  const supabase = createClient()
+  const { userId, getToken } = useAuth()
   const [name, setName] = useState("")
   const [color, setColor] = useState(CLUSTER_COLORS[0])
   const setNodes = useGraphStore((s) => s.setNodes)
@@ -25,9 +26,9 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
     e.preventDefault()
     if (!name.trim()) return
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!userId) return
 
+    const supabase = await createAuthenticatedClient(() => getToken({ template: "supabase" }))
     const clusterId = crypto.randomUUID()
     const ui_x = Math.round(Math.random() * 300)
     const ui_y = Math.round(Math.random() * 300)
@@ -41,7 +42,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
 
     await supabase.from("clusters").insert({
       id: clusterId,
-      user_id: user.id,
+      user_id: userId,
       name: name.trim(),
       color,
       ui_x,
@@ -99,3 +100,5 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
     </Dialog>
   )
 }
+
+
