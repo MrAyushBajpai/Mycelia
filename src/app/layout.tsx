@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Providers } from "@/components/providers"
@@ -28,12 +29,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-[#050505]">
-        <Providers>
+        <ClerkProvider>
+          <Providers>
           <Sidebar />
           <LayoutWrapper>
-            {children}
+          {children}
           </LayoutWrapper>
-        </Providers>
+          </Providers>
+        </ClerkProvider>
       </body>
     </html>
   )
