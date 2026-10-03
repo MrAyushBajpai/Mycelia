@@ -1,5 +1,5 @@
-﻿import { CLUSTER_COLORS } from "@/lib/constants"
-"use client"
+﻿"use client"
+import { CLUSTER_COLORS } from "@/lib/constants"
 
 import * as React from "react"
 import { useState, useEffect } from "react"
