@@ -110,9 +110,16 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
         {/* 4-way handles: connectionMode=Loose allows source→source connections */}
+        <Handle type="target" position={Position.Top} id="top" className="absolute opacity-0 !w-3 !h-3" />
         <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        
+        <Handle type="target" position={Position.Right} id="right" className="absolute opacity-0 !w-3 !h-3" />
         <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        
+        <Handle type="target" position={Position.Bottom} id="bottom" className="absolute opacity-0 !w-3 !h-3" />
         <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
+        
+        <Handle type="target" position={Position.Left} id="left" className="absolute opacity-0 !w-3 !h-3" />
         <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 transition-colors hover:!bg-white/30" />
 
         <div className="flex items-center gap-2">
