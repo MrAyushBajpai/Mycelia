@@ -1,4 +1,4 @@
-import { create } from "zustand"
+﻿import { create } from "zustand"
 import {
   type Node,
   type Edge,
@@ -21,6 +21,7 @@ type GraphState = {
   setEdges: (edges: Edge[]) => void
   selectNode: (id: string | null) => void
   deleteNode: (id: string) => void
+  updateEdgeLabel: (id: string, newLabel: string) => Promise<void>
   autoLayout: (options?: { resetPins?: boolean; localMode?: boolean }) => void
 }
 
@@ -53,6 +54,25 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         set({ nodes: nextNodes, selectedNodeId: null })
         return
       }
+    }
+    
+    // Handle node deletions in DB when user presses backspace/delete
+    const removes = changes.filter(c => c.type === "remove")
+    if (removes.length > 0) {
+      // capture old nodes before we lose them
+      const oldNodes = get().nodes
+      import("@/lib/supabase/client").then(({ createClient }) => {
+        const supabase = createClient()
+        removes.forEach(async (change: any) => {
+          const id = change.id
+          const node = oldNodes.find(n => n.id === id) || { type: "person" }
+          if (node.type === "person") {
+            await supabase.from("contacts").delete().eq("id", id)
+          } else if (node.type === "cluster") {
+            await supabase.from("clusters").delete().eq("id", id)
+          }
+        })
+      })
     }
     
     set({ nodes: nextNodes })
@@ -169,6 +189,20 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }
   },
 
+  updateEdgeLabel: async (id, newLabel) => {
+    const { edges } = get()
+    set({ edges: edges.map(e => e.id === id ? { ...e, label: newLabel } : e) })
+    
+    const supabase = (await import("@/lib/supabase/client")).createClient()
+    if (id.startsWith("cc-")) {
+      const parts = id.split("-")
+      if (parts.length === 3) {
+        await supabase.from("contact_clusters").update({ label: newLabel }).eq("contact_id", parts[1]).eq("cluster_id", parts[2])
+      }
+    } else {
+      await supabase.from("edges").update({ label: newLabel }).eq("id", id)
+    }
+  },
   autoLayout: async (options) => {
     const { computeLayout } = await import('@/lib/layout')
     const { nodes, edges } = get()
