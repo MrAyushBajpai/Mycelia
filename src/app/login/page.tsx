@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -40,6 +40,13 @@ export default function LoginPage() {
   const handleSignUp = async () => {
     if (!email || !password) {
       setError("Email and password required")
+      return
+    }
+
+    const domain = email.split("@")[1]?.toLowerCase()
+    const ALLOWED_DOMAINS = ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "proton.me", "protonmail.com", "live.com", "msn.com"]
+    if (!domain || !ALLOWED_DOMAINS.includes(domain)) {
+      setError("Please use a major email provider (Gmail, Outlook, Yahoo, etc.)")
       return
     }
     setLoading(true)
@@ -99,7 +106,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••" 
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
               required
               className="h-11 px-4 rounded-xl bg-white/[0.02] border-white/[0.06] text-white/90 placeholder:text-white/20 hover:bg-white/[0.04] transition-colors focus-visible:bg-white/[0.06] focus-visible:border-primary/40 focus-visible:ring-primary/20" 
             />
