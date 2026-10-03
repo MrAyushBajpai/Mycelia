@@ -201,7 +201,9 @@ export function computeLayout(
     }
   }
 
-  const simEdges = sortedEdges.map(e => ({ source: e.source, target: e.target }))
+  const simEdges = sortedEdges
+    .filter(e => simNodes.some(n => n.id === e.source) && simNodes.some(n => n.id === e.target))
+    .map(e => ({ source: e.source, target: e.target }))
 
   // Backup directional force
   const directionForce = (alpha: number) => {

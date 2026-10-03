@@ -26,6 +26,7 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
   const [newRelationshipName, setNewRelationshipName] = useState("")
   
   const [notes, setNotes] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const setNodes = useGraphStore((s) => s.setNodes)
   const setEdges = useGraphStore((s) => s.setEdges)
@@ -43,12 +44,14 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!name.trim() || isSubmitting) return
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-    const personId = crypto.randomUUID()
+      const personId = crypto.randomUUID()
     const ui_x = Math.round(Math.random() * 400 + 100)
     const ui_y = Math.round(Math.random() * 300 + 50)
 
@@ -123,15 +126,18 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
       }])
     }
 
-    setName("")
-    setEmail("")
-    setPhone("")
-    setClusterId("")
-    setNewClusterName("")
-    setRelationship("")
-    setNewRelationshipName("")
-    setNotes("")
-    onOpenChange(false)
+      setName("")
+      setEmail("")
+      setPhone("")
+      setClusterId("")
+      setNewClusterName("")
+      setRelationship("")
+      setNewRelationshipName("")
+      setNotes("")
+      onOpenChange(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -227,7 +233,9 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
             />
           </div>
 
-          <Button type="submit" className="w-full mt-2 font-medium">Add Person</Button>
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-2 font-medium">
+            {isSubmitting ? "Adding..." : "Add Person"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -21,12 +21,8 @@ export default function PeoplePage() {
   const [sortBy, setSortBy] = useState<SortOption>("urgency")
 
   useEffect(() => {
-    if (nodes.length === 0) {
-      setNodes(SEED_NODES)
-      setEdges(SEED_EDGES)
-    }
     setMounted(true)
-  }, [nodes.length, setNodes, setEdges])
+  }, [])
 
   const people = useMemo(() => nodes.filter(n => n.type === "person"), [nodes])
   const circles = useMemo(() => nodes.filter(n => n.type === "cluster"), [nodes])

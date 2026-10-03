@@ -74,3 +74,17 @@ create policy "Users see own contact_clusters" on contact_clusters for all using
 );
 create policy "Users see own edges" on edges for all using (auth.uid() = user_id);
 create policy "Users see own interactions" on interactions for all using (auth.uid() = user_id);
+CREATE OR REPLACE FUNCTION update_last_contacted_at()
+RETURNS TRIGGER AS $BODY
+BEGIN
+  UPDATE contacts SET last_contacted_at = NEW.occurred_at
+  WHERE id = NEW.contact_id AND (last_contacted_at IS NULL OR last_contacted_at < NEW.occurred_at);
+  RETURN NEW;
+END;
+$BODY LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_last_contacted_at ON interactions;
+
+CREATE TRIGGER trigger_update_last_contacted_at
+AFTER INSERT ON interactions
+FOR EACH ROW EXECUTE FUNCTION update_last_contacted_at();
