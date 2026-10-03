@@ -51,7 +51,6 @@ export default function LoginPage() {
       setError(authError.message)
       setLoading(false)
     } else {
-      // If email confirmation is disabled, signUp auto-logs in.
       setMessage("Account created! If not redirected, please log in.")
       router.push("/")
     }
