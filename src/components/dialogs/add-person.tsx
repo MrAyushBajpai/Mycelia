@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { useGraphStore } from "@/stores/graph-store"
+import { createClient } from "@/lib/supabase/client"
 
 type Props = {
   open: boolean
@@ -13,6 +14,7 @@ type Props = {
 }
 
 export function AddPersonDialog({ open, onOpenChange }: Props) {
+  const supabase = createClient()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
@@ -39,15 +41,21 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
     return Array.from(new Set(labels)).sort()
   }, [edges])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
 
-    const id = `p-${Date.now()}`
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const personId = crypto.randomUUID()
+    const ui_x = Math.round(Math.random() * 400 + 100)
+    const ui_y = Math.round(Math.random() * 300 + 50)
+
     const newNode = {
-      id,
+      id: personId,
       type: "person" as const,
-      position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 50 },
+      position: { x: ui_x, y: ui_y },
       data: { 
         label: name.trim(), 
         email: email || null, 
@@ -59,15 +67,40 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
     const currentNodes = useGraphStore.getState().nodes
     let finalClusterId = clusterId
 
+    // 1. Save Person
+    await supabase.from("contacts").insert({
+      id: personId,
+      user_id: user.id,
+      name: name.trim(),
+      email: email || null,
+      phone: phone || null,
+      notes: notes.trim() || null,
+      ui_x,
+      ui_y
+    })
+
     // Handle inline cluster creation
     if (clusterId === "__NEW__" && newClusterName.trim()) {
-      finalClusterId = `c-${Date.now()}`
+      finalClusterId = crypto.randomUUID()
+      const c_x = Math.round(Math.random() * 400 + 100)
+      const c_y = Math.round(Math.random() * 300 + 50)
+
       const newClusterNode = {
         id: finalClusterId,
         type: "cluster" as const,
-        position: { x: Math.random() * 400 + 100, y: Math.random() * 300 + 50 },
-        data: { label: newClusterName.trim(), color: "#3b82f6" }, // Default blue for new
+        position: { x: c_x, y: c_y },
+        data: { label: newClusterName.trim(), color: "#3b82f6" }, 
       }
+
+      await supabase.from("clusters").insert({
+        id: finalClusterId,
+        user_id: user.id,
+        name: newClusterName.trim(),
+        color: "#3b82f6",
+        ui_x: c_x,
+        ui_y: c_y
+      })
+
       setNodes([...currentNodes, newClusterNode, newNode])
     } else {
       setNodes([...currentNodes, newNode])
@@ -75,10 +108,16 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
 
     if (finalClusterId && finalClusterId !== "__NEW__") {
       const finalRelationship = relationship === "__NEW__" ? newRelationshipName.trim() : relationship.trim()
+      
+      await supabase.from("contact_clusters").insert({
+        contact_id: personId,
+        cluster_id: finalClusterId
+      })
+
       const currentEdges = useGraphStore.getState().edges
       setEdges([...currentEdges, { 
-        id: `e-${Date.now()}`, 
-        source: id, 
+        id: `cc-${personId}-${finalClusterId}`, 
+        source: personId, 
         target: finalClusterId,
         label: finalRelationship || undefined
       }])

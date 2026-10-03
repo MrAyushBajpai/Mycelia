@@ -3,6 +3,8 @@ export type Cluster = {
   user_id: string
   name: string
   color: string
+  ui_x: number
+  ui_y: number
   created_at: string
 }
 
@@ -17,6 +19,8 @@ export type Contact = {
   custom_dates: Record<string, string>
   cadence_days: number | null
   last_contacted_at: string | null
+  ui_x: number
+  ui_y: number
   created_at: string
 }
 

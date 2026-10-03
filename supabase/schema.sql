@@ -7,6 +7,8 @@ create table clusters (
   user_id uuid not null references auth.users(id) on delete cascade,
   name varchar(100) not null check (char_length(trim(name)) > 0),
   color varchar(7) default '#6366f1' check (color ~* '^#[0-9a-f]{6}$'),
+  ui_x numeric default 0,
+  ui_y numeric default 0,
   created_at timestamptz default now()
 );
 
@@ -22,6 +24,8 @@ create table contacts (
   custom_dates jsonb default '{}'::jsonb,
   cadence_days integer check (cadence_days > 0), -- remind every N days
   last_contacted_at timestamptz,
+  ui_x numeric default 0,
+  ui_y numeric default 0,
   created_at timestamptz default now()
 );
 
