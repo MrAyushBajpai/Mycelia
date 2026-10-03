@@ -1,4 +1,6 @@
-"use client"
+﻿"use client"
+import { createClient } from "@/lib/supabase/client"
+import { CLUSTER_COLORS } from "@/lib/constants"
 
 import { useState } from "react"
 import { useGraphStore } from "@/stores/graph-store"
@@ -9,8 +11,18 @@ import { formatDistanceToNow } from "date-fns"
 type Tab = "overview" | "members" | "activity"
 
 export function CircleDetail() {
-  const { nodes, edges, selectedNodeId, selectNode } = useGraphStore()
-  const { interactionsByContact } = useInteractionStore()
+  const { nodes, edges, selectedNodeId, selectNode, setNodes } = useGraphStore()
+    const { interactionsByContact } = useInteractionStore()
+  
+  async function updateColor(newColor: string) {
+    if (!selectedNodeId) return
+    const currentNodes = useGraphStore.getState().nodes
+    setNodes(currentNodes.map(n => n.id === selectedNodeId ? { ...n, data: { ...n.data, color: newColor } } : n))
+    
+    const supabase = createClient()
+    const { error } = await supabase.from("clusters").update({ color: newColor }).eq("id", selectedNodeId)
+    if (error) console.error("Failed to update color:", error)
+  }
   
   const [activeTab, setActiveTab] = useState<Tab>("overview")
   
@@ -98,6 +110,24 @@ export function CircleDetail() {
                     {data.description || "No description provided."}
                   </span>
                 </div>
+                <div className="grid grid-cols-[100px_1fr] items-start mt-1">
+                  <span className="text-white/40 mt-1">Color</span>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {CLUSTER_COLORS.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => updateColor(c)}
+                        className="w-6 h-6 rounded-full border-2 transition-transform shadow-sm hover:scale-110"
+                        style={{ 
+                          backgroundColor: c, 
+                          borderColor: data.color === c ? "white" : "transparent",
+                          transform: data.color === c ? "scale(1.15)" : "scale(1)"
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -163,3 +193,4 @@ export function CircleDetail() {
     </div>
   )
 }
+
