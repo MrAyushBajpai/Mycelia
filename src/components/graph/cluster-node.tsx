@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { memo } from "react"
 import { Handle, Position, type NodeProps } from "@xyflow/react"
@@ -16,7 +16,7 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
   return (
     <div
       className={cn(
-        "rounded-full border-[1.5px] px-6 py-3 transition-all duration-300 cursor-pointer",
+        "rounded-full border-[1.5px] px-6 py-3 transition-all duration-300 cursor-pointer group",
         selected 
           ? "scale-110 z-10" 
           : "hover:scale-105"
@@ -30,13 +30,13 @@ export const ClusterNode = memo(function ClusterNode({ data, selected }: NodePro
       }}
     >
       <Handle type="target" position={Position.Top} id="top" className="absolute opacity-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30" style={{ borderColor: color }} />
+      <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" style={{ borderColor: color }} />
       <Handle type="target" position={Position.Right} id="right" className="absolute opacity-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30" style={{ borderColor: color }} />
+      <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" style={{ borderColor: color }} />
       <Handle type="target" position={Position.Bottom} id="bottom" className="absolute opacity-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30" style={{ borderColor: color }} />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" style={{ borderColor: color }} />
       <Handle type="target" position={Position.Left} id="left" className="absolute opacity-0 !w-3 !h-3" />
-      <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 transition-colors hover:!bg-white/30" style={{ borderColor: color }} />
+      <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" style={{ borderColor: color }} />
 
       <div 
         className="text-[12px] font-medium uppercase tracking-[0.15em]" 
