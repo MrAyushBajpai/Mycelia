@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -21,7 +21,6 @@ export function AddPersonDialog({ open, onOpenChange }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const setNodes = useGraphStore((s) => s.setNodes)
-  const nodes = useGraphStore((s) => s.nodes)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
