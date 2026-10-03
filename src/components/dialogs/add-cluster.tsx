@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useGraphStore } from "@/stores/graph-store"
 import { createClient } from "@/lib/supabase/client"
 
-const COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"]
+import { CLUSTER_COLORS } from "@/lib/constants"
 
 type Props = {
   open: boolean
@@ -18,7 +18,7 @@ type Props = {
 export function AddClusterDialog({ open, onOpenChange }: Props) {
   const supabase = createClient()
   const [name, setName] = useState("")
-  const [color, setColor] = useState(COLORS[0])
+  const [color, setColor] = useState(CLUSTER_COLORS[0])
   const setNodes = useGraphStore((s) => s.setNodes)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -52,7 +52,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
     setNodes([...currentNodes, newNode])
     
     setName("")
-    setColor(COLORS[0])
+    setColor(CLUSTER_COLORS[0])
     onOpenChange(false)
   }
 
@@ -78,7 +78,7 @@ export function AddClusterDialog({ open, onOpenChange }: Props) {
           <div className="space-y-2">
             <Label>Color</Label>
             <div className="flex gap-2">
-              {COLORS.map((c) => (
+              {CLUSTER_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
