@@ -7,6 +7,7 @@ import {
   type NodeTypes,
   type Connection,
   MarkerType,
+  ConnectionMode,
   type DefaultEdgeOptions,
   useReactFlow
 } from "@xyflow/react"
@@ -181,7 +182,7 @@ export function GraphCanvas() {
           edgeTypes={edgeTypes}
           defaultEdgeOptions={defaultEdgeOptions}
           deleteKeyCode={["Backspace", "Delete"]}
-          connectionMode="loose"
+          connectionMode={ConnectionMode.Loose}
           fitView
           proOptions={{ hideAttribution: true }}
         >
