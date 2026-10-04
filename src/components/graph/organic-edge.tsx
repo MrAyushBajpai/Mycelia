@@ -125,10 +125,10 @@ export const OrganicEdge = memo(function OrganicEdge({
                 onClick={handleDelete}
               >
                 <div
-                  className="flex items-center justify-center w-5 h-5 rounded-full bg-destructive/20 border border-destructive/30 text-destructive hover:bg-destructive hover:text-white transition-colors"
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-destructive/20 border border-destructive/30 text-destructive hover:bg-destructive hover:text-white transition-colors"
                   title="Delete Edge"
                 >
-                  <X size={10} strokeWidth={3} />
+                  <X size={14} strokeWidth={2.5} />
                 </div>
                 <div className="flex gap-1">
                   <kbd className="h-4 px-1 rounded bg-white/10 border border-white/20 text-[8px] text-white/50 flex items-center font-mono uppercase">Del</kbd>

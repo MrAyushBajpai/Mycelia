@@ -6,7 +6,8 @@ import { useState, useMemo } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore, Interaction } from "@/stores/interaction-store"
-import { X, Edit2, Plus } from "lucide-react"
+import { X, Edit2, Plus, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { formatDistanceToNow } from "date-fns"
 
 type Tab = "overview" | "members" | "activity"
@@ -32,6 +33,8 @@ export function CircleDetail() {
   }
   
   const [activeTab, setActiveTab] = useState<Tab>("overview")
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const deleteNode = useGraphStore(s => s.deleteNode)
   
   if (!selectedNode || selectedNode.type !== "cluster") return null
   
@@ -195,6 +198,23 @@ export function CircleDetail() {
               )) : (
                 <div className="text-white/40 text-sm">No activity recorded.</div>
               )}
+            </div>
+          )}
+        </div>
+        
+        <div className="mt-8">
+          {!confirmDelete ? (
+            <Button variant="ghost" size="sm" className="w-full text-white/30 hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={() => setConfirmDelete(true)}>
+              <Trash2 size={13} className="mr-2" />
+              Remove Circle
+            </Button>
+          ) : (
+            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-center animate-in fade-in duration-200">
+              <p className="text-[11px] text-white/70 mb-2">Delete this circle? (Cannot be undone)</p>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="flex-1 text-white/50 hover:text-white" onClick={() => setConfirmDelete(false)}>Cancel</Button>
+                <Button variant="destructive" size="sm" className="flex-1 font-semibold" onClick={() => { if (selectedNodeId) deleteNode(selectedNodeId); setConfirmDelete(false); selectNode(null); }}>Delete</Button>
+              </div>
             </div>
           )}
         </div>

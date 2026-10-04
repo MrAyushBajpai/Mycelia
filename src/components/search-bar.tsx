@@ -127,12 +127,8 @@ export function SearchBar() {
     <div 
       ref={containerRef}
       className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center"
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => {
-        if (document.activeElement !== searchInputRef.current && !query) {
-          setIsExpanded(false)
-        }
-      }}
+      
+      
     >
       <div 
         className={`flex items-center h-10 bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] hover:bg-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)] rounded-full transition-all duration-300 ease-out overflow-hidden cursor-text ${isActuallyExpanded ? "w-80 px-1" : "w-10 px-0 justify-center"}`}

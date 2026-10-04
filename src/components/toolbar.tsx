@@ -8,6 +8,7 @@ import { AddClusterDialog } from "@/components/dialogs/add-cluster"
 import { ImportCsvDialog } from "@/components/dialogs/import-csv"
 import { NotificationMenu } from "@/components/notification-menu"
 import { useGraphStore } from "@/stores/graph-store"
+import { useUIStore } from "@/stores/ui-store"
 import { useReactFlow } from "@xyflow/react"
 
 export function Toolbar() {
@@ -62,7 +63,7 @@ export function Toolbar() {
 
   return (
     <>
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-1 items-center p-1.5 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)] animate-in slide-in-from-bottom-5 duration-700">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex gap-1 items-center p-1.5 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.04)] animate-in slide-in-from-bottom-5 duration-700 max-w-[calc(100vw-32px)] overflow-x-auto no-scrollbar">
         <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/90 gap-1.5" onClick={() => setPersonOpen(true)} title="Add a new person (P)">
           <User size={14} />
           <span>Add Person</span>
@@ -96,7 +97,7 @@ export function Toolbar() {
           <UploadCloud size={14} />
         </Button>
         <div className="w-px h-5 bg-white/[0.06]" />
-        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/70 hover:text-white gap-1.5" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }))} title="Log interaction (⌘K)">
+        <Button variant="ghost" size="sm" className="rounded-full hover:bg-white/10 text-white/70 hover:text-white gap-1.5" onClick={() => useUIStore.getState().setCommandBarOpen(!useUIStore.getState().commandBarOpen)} title="Log interaction (⌘K)">
           <MessageSquare size={14} />
           <span className="text-white/90">Log</span>
           <kbd className="text-[10px] text-white/25 bg-white/[0.04] border border-white/[0.06] rounded px-1.5 py-0.5 font-mono hidden sm:block">⌘K</kbd>
