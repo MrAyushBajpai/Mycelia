@@ -110,17 +110,17 @@ export const PersonNode = memo(function PersonNode({ id, data, selected }: NodeP
           <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
         )}
         {/* 4-way handles: connectionMode=Loose allows sourceâ†’source connections */}
-        <Handle type="target" position={Position.Top} id="top" className="absolute opacity-0 !w-3 !h-3" />
-        <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" />
+        <Handle type="target" position={Position.Top} id="top" className="absolute opacity-0 !w-3 !h-3 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
+        <Handle type="source" position={Position.Top} id="top" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
         
-        <Handle type="target" position={Position.Right} id="right" className="absolute opacity-0 !w-3 !h-3" />
-        <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" />
+        <Handle type="target" position={Position.Right} id="right" className="absolute opacity-0 !w-3 !h-3 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
+        <Handle type="source" position={Position.Right} id="right" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
         
-        <Handle type="target" position={Position.Bottom} id="bottom" className="absolute opacity-0 !w-3 !h-3" />
-        <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" />
+        <Handle type="target" position={Position.Bottom} id="bottom" className="absolute opacity-0 !w-3 !h-3 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
+        <Handle type="source" position={Position.Bottom} id="bottom" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
         
-        <Handle type="target" position={Position.Left} id="left" className="absolute opacity-0 !w-3 !h-3" />
-        <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125" />
+        <Handle type="target" position={Position.Left} id="left" className="absolute opacity-0 !w-3 !h-3 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
+        <Handle type="source" position={Position.Left} id="left" className="!bg-[#18181b] !border-[1.5px] !border-white/40 !w-3 !h-3 !rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:!bg-white/30 hover:scale-125 after:content-[''] after:absolute after:-inset-4 after:bg-transparent" />
 
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-semibold text-white/60 shrink-0 uppercase relative overflow-hidden">

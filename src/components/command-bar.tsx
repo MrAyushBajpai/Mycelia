@@ -6,6 +6,7 @@ import * as chrono from "chrono-node"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { useGraphStore } from "@/stores/graph-store"
 import { useInteractionStore } from "@/stores/interaction-store"
+import { useUIStore } from "@/stores/ui-store"
 
 export function CommandBar() {
   const [open, setOpen] = useState(false)
@@ -19,7 +20,7 @@ export function CommandBar() {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen((open) => !open)
+        setOpen(!useUIStore.getState().commandBarOpen)
       }
     }
     document.addEventListener("keydown", down)
