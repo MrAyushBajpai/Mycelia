@@ -1,6 +1,6 @@
-﻿"use client"
+"use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import {
   ReactFlow,
   Controls,
@@ -38,10 +38,14 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 }
 
 function DynamicBackground() {
-  const [mouse, setMouse] = useState({ x: -1000, y: -1000 })
+  const spotlightRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleMove = (e: PointerEvent) => setMouse({ x: e.clientX, y: e.clientY })
+    const handleMove = (e: PointerEvent) => {
+      if (spotlightRef.current) {
+        spotlightRef.current.style.background = `radial-gradient(800px circle at ${e.clientX}px ${e.clientY}px, rgba(255,255,255,0.06), transparent 50%)`
+      }
+    }
     window.addEventListener("pointermove", handleMove)
     return () => window.removeEventListener("pointermove", handleMove)
   }, [])
@@ -58,9 +62,10 @@ function DynamicBackground() {
       />
       {/* Broad spotlight */}
       <div 
+        ref={spotlightRef}
         className="absolute inset-0 transition-opacity duration-300"
         style={{
-          background: `radial-gradient(800px circle at ${mouse.x}px ${mouse.y}px, rgba(255,255,255,0.06), transparent 50%)`
+          background: `radial-gradient(800px circle at -1000px -1000px, rgba(255,255,255,0.06), transparent 50%)`
         }}
       />
     </div>
@@ -84,9 +89,11 @@ export function GraphCanvas() {
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
   const [hasLaidOut, setHasLaidOut] = useState(false)
 
+  // Use nodes.length to trigger on initial load/additions, now for edits/time passing.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     syncGraph(nodes, now)
-  }, [nodes, now, syncGraph])
+  }, [nodes.length, now, syncGraph])
   
   useEffect(() => {
     if (nodes.length > 0 && nodes.every(n => n.measured?.width)) {
