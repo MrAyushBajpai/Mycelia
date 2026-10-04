@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { Network, User, Users, Calendar, Settings, ChevronsLeft, Menu } from "lucide-react"
+import { Network, User, Users, Calendar, ChevronsLeft, Menu } from "lucide-react"
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs"
 import { useUIStore } from "@/stores/ui-store"
 
@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { name: "People", href: "/people", icon: User },
   { name: "Circles", href: "/circles", icon: Users },
   { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function Sidebar() {
