@@ -10,7 +10,7 @@ create or replace function requesting_user_id()
 returns text
 language sql stable
 as $$
-  select nullif(current_setting('request.jwt.claim.sub', true), '')::text;
+  select nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')::text;
 $$;
 
 create table clusters (
@@ -73,13 +73,15 @@ alter table contact_clusters enable row level security;
 alter table edges enable row level security;
 alter table interactions enable row level security;
 
-create policy "Users see own clusters" on clusters for all using (requesting_user_id() = user_id);
-create policy "Users see own contacts" on contacts for all using (requesting_user_id() = user_id);
+create policy "Users see own clusters" on clusters for all using (requesting_user_id() = user_id) with check (requesting_user_id() = user_id);
+create policy "Users see own contacts" on contacts for all using (requesting_user_id() = user_id) with check (requesting_user_id() = user_id);
 create policy "Users see own contact_clusters" on contact_clusters for all using (
   contact_id in (select id from contacts where user_id = requesting_user_id())
+) with check (
+  contact_id in (select id from contacts where user_id = requesting_user_id())
 );
-create policy "Users see own edges" on edges for all using (requesting_user_id() = user_id);
-create policy "Users see own interactions" on interactions for all using (requesting_user_id() = user_id);
+create policy "Users see own edges" on edges for all using (requesting_user_id() = user_id) with check (requesting_user_id() = user_id);
+create policy "Users see own interactions" on interactions for all using (requesting_user_id() = user_id) with check (requesting_user_id() = user_id);
 
 CREATE OR REPLACE FUNCTION update_last_contacted_at()
 RETURNS TRIGGER 
