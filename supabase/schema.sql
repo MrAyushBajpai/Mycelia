@@ -1,11 +1,11 @@
--- Mycelia Database Schema (Clerk Auth Version)
-
+-- DANGER: DROPS ALL DATA
 drop table if exists interactions cascade;
 drop table if exists edges cascade;
 drop table if exists contact_clusters cascade;
 drop table if exists contacts cascade;
 drop table if exists clusters cascade;
 
+-- Clerk reads JWT 'sub' claim from claims JSON
 create or replace function requesting_user_id()
 returns text
 language sql stable
@@ -67,6 +67,7 @@ create table interactions (
   created_at timestamptz default now()
 );
 
+-- RLS
 alter table clusters enable row level security;
 alter table contacts enable row level security;
 alter table contact_clusters enable row level security;
